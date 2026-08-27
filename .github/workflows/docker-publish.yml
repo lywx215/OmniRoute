@@ -33,6 +33,9 @@ permissions:
 
 jobs:
   prepare:
+    # This is the upstream project's publisher. Forks build their own image in
+    # zeabur-production.yml instead of requiring upstream Docker Hub secrets.
+    if: github.repository_owner == 'diegosouzapw'
     name: Resolve Docker release metadata
     runs-on: ubuntu-latest
     outputs:

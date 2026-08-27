@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
+# Bootstrap reference only: replace the image tag below with a tag produced by
+# zeabur-production.yml before passing this file to Zeabur.
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: OmniRoute
+spec:
+  description: Single-replica OmniRoute runner-base service with persistent SQLite storage.
+  variables:
+    - key: PUBLIC_DOMAIN
+      type: DOMAIN
+      name: Public domain
+      description: HTTPS domain bound to the OmniRoute web port.
+    - key: JWT_SECRET
+      type: PASSWORD
+      name: JWT secret
+      description: Independent value generated with openssl rand -base64 48.
+    - key: API_KEY_SECRET
+      type: PASSWORD
+      name: API key encryption secret
+      description: Independent value generated with openssl rand -hex 32.
+    - key: STORAGE_ENCRYPTION_KEY
+      type: PASSWORD
+      name: Storage encryption key
+      description: Independent value generated with openssl rand -hex 32; back it up safely.
+    - key: INITIAL_PASSWORD
+      type: PASSWORD
+      name: Initial administrator password
+      description: Strong independent password used for the first dashboard login.
+  services:
+    - name: OmniRoute
+      template: PREBUILT_V2
+      domainKey:
+        - port: web
+          variable: PUBLIC_DOMAIN
+      spec:
+        source:
+          image: ghcr.io/lywx215/omniroute:sha-REPLACE_WITH_FULL_40_CHARACTER_GIT_SHA
+        ports:
+          - id: web
+            port: 20128
+            type: HTTP
+        volumes:
+          - id: data
+            dir: /app/data
+        healthCheck:
+          type: HTTP
+          port: web
+          http:
+            path: /healthz
+        env:
+          NODE_ENV:
+            default: production
+          PORT:
+            default: "20128"
+          HOSTNAME:
+            default: 0.0.0.0
+          DATA_DIR:
+            default: /app/data
+          APP_LOG_LEVEL:
+            default: info
+          NEXT_PUBLIC_BASE_URL:
+            default: "https://${PUBLIC_DOMAIN}"
+          OMNIROUTE_PUBLIC_BASE_URL:
+            default: "https://${PUBLIC_DOMAIN}"
+          REQUIRE_API_KEY:
+            default: "true"
+          AUTH_COOKIE_SECURE:
+            default: "true"
+          OMNIROUTE_ENABLE_LIVE_WS:
+            default: "1"
+          LIVE_WS_HOST:
+            default: 127.0.0.1
+          LIVE_WS_PORT:
+            default: "20132"
+          LIVE_WS_PUBLIC_URL:
+            default: "wss://${PUBLIC_DOMAIN}/live-ws"
+          LIVE_WS_ALLOWED_ORIGINS:
+            default: "https://${PUBLIC_DOMAIN}"
+          OMNIROUTE_BROWSER_POOL:
+            default: "off"
+          WEB_COOKIE_USE_BROWSER:
+            default: "0"
+          PROXY_AUTO_SELECT_ENABLED:
+            default: "false"
+          ONEPROXY_ENABLED:
+            default: "false"
+          OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK:
+            default: "false"
+          MITM_DISABLE_TLS_VERIFY:
+            default: "0"
+          OMNIROUTE_TURNSTILE_IGNORE_TLS_ERRORS:
+            default: "false"
