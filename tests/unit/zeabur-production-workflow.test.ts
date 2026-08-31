@@ -15,6 +15,7 @@ const zeaburTemplate = fs.readFileSync(
   "utf8"
 );
 const dockerfile = fs.readFileSync(path.join(repoRoot, "Dockerfile"), "utf8");
+const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"));
 
 test("fork production workflow publishes one immutable runner-base image", () => {
   assert.match(workflow, /branches:\s*\n\s*- production/);
@@ -32,6 +33,17 @@ test("plain source builds finish on the production-safe runner-base flavor", () 
   assert.ok(lastStage);
   assert.equal(lastStage[1], "runner-base");
   assert.equal(lastStage[2], "runner-base-default");
+});
+
+test("Docker builder installs config-time dev dependencies under production injection", () => {
+  const builderStage = dockerfile.match(/FROM base AS builder([\s\S]*?)FROM base AS runner-base/);
+
+  assert.ok(builderStage);
+  assert.equal(packageJson.dependencies?.["fumadocs-mdx"], undefined);
+  assert.equal(packageJson.devDependencies?.["fumadocs-mdx"], "^15.3.1");
+  assert.match(builderStage[1], /ENV NODE_ENV=development/);
+  assert.match(builderStage[1], /npm ci --include=dev --include=optional/);
+  assert.match(builderStage[1], /ENV NODE_ENV=production[\s\S]*npm run build/);
 });
 
 test("Zeabur deploy is optional and only changes the existing service tag", () => {

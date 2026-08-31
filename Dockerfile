@@ -64,6 +64,10 @@ FROM base AS builder
 # every image build is silent; the runtime never builds, so this covers the
 # only phase Next telemetry can fire.
 ENV NEXT_TELEMETRY_DISABLED=1
+# Source-build platforms may inject NODE_ENV=production into every build stage.
+# The builder needs devDependencies because next.config.mjs imports build-time
+# plugins such as fumadocs-mdx before Next.js compilation starts.
+ENV NODE_ENV=development
 
 # Build tools for native module compilation
 # apt-get update needed here because base's rm -rf clears the shared cache
@@ -115,7 +119,7 @@ RUN test -f package-lock.json \
 # a broken/rate-limited fetch fails the BUILD loudly instead of shipping a
 # broken image.
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-npm-cache,target=/root/.npm \
-  npm ci --include=optional --no-audit --no-fund --legacy-peer-deps --ignore-scripts \
+  npm ci --include=dev --include=optional --no-audit --no-fund --legacy-peer-deps --ignore-scripts \
   && (cd node_modules/better-sqlite3 \
       && node /usr/local/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js rebuild) \
   && node -e "require('better-sqlite3')(':memory:').close()" \
@@ -208,6 +212,10 @@ ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_BUILD_MEMORY_MB}"
 # OMNIROUTE_BUILD_WORKERS=8`.
 ARG OMNIROUTE_BUILD_WORKERS=2
 ENV CIRCLE_NODE_TOTAL=${OMNIROUTE_BUILD_WORKERS}
+
+# Restore the production mode explicitly for Next.js optimization after the
+# complete build dependency tree has been installed.
+ENV NODE_ENV=production
 
 COPY . ./
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-next-cache,target=/app/.build/next/cache \
