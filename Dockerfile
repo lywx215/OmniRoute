@@ -348,3 +348,8 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-npm-cache,targe
   npm install -g --no-audit --no-fund @openai/codex @anthropic-ai/claude-code droid openclaw@latest
 
 USER node
+
+# Keep plain `docker build .` and source-build platforms on the production-safe
+# runner-base flavor. Specialized images must opt in with an explicit
+# `--target runner-web` or `--target runner-cli`.
+FROM runner-base AS runner-base-default

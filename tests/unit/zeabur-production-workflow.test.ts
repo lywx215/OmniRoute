@@ -14,6 +14,7 @@ const zeaburTemplate = fs.readFileSync(
   path.join(repoRoot, "contrib/zeabur/template.example.yaml"),
   "utf8"
 );
+const dockerfile = fs.readFileSync(path.join(repoRoot, "Dockerfile"), "utf8");
 
 test("fork production workflow publishes one immutable runner-base image", () => {
   assert.match(workflow, /branches:\s*\n\s*- production/);
@@ -22,6 +23,15 @@ test("fork production workflow publishes one immutable runner-base image", () =>
   assert.match(workflow, /target: runner-base/);
   assert.match(workflow, /platforms: linux\/amd64/);
   assert.doesNotMatch(workflow, /(?:tags|IMAGE_TAG):[^\n]*latest/);
+});
+
+test("plain source builds finish on the production-safe runner-base flavor", () => {
+  const stages = [...dockerfile.matchAll(/^FROM\s+([^\s]+)(?:\s+AS\s+([^\s]+))?/gim)];
+  const lastStage = stages.at(-1);
+
+  assert.ok(lastStage);
+  assert.equal(lastStage[1], "runner-base");
+  assert.equal(lastStage[2], "runner-base-default");
 });
 
 test("Zeabur deploy is optional and only changes the existing service tag", () => {
