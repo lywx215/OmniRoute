@@ -323,7 +323,18 @@ const EXTRA_MODULE_ENTRIES = [
   },
   { label: "public directory", src: ["public"], dest: ["public"] },
   {
-    label: "playwright-core (dynamic import by gemini-web executor)",
+    // Gemini Web dynamically imports `playwright`, not just playwright-core.
+    // npm may nest its matching playwright-core version below playwright when
+    // another workspace hoists a different core version. Copy the wrapper's
+    // complete closure so browsers.json remains resolvable in standalone builds.
+    label: "playwright (dynamic import by Gemini Web executor)",
+    src: ["node_modules", "playwright"],
+    dest: ["node_modules", "playwright"],
+  },
+  {
+    // Some browser integrations import playwright-core directly, so retain the
+    // top-level copy in addition to playwright's potentially nested closure.
+    label: "playwright-core (direct dynamic imports)",
     src: ["node_modules", "playwright-core"],
     dest: ["node_modules", "playwright-core"],
   },

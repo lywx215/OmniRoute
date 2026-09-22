@@ -19,7 +19,20 @@ test("#3516 detects the Playwright missing-executable launch error", () => {
 });
 
 test("#3516 detects the 'npx playwright install' guidance variant", () => {
-  assert.equal(isMissingBrowserExecutable("Please run the following command: npx playwright install"), true);
+  assert.equal(
+    isMissingBrowserExecutable("Please run the following command: npx playwright install"),
+    true
+  );
+});
+
+test("detects a broken Playwright package closure", () => {
+  assert.equal(
+    isMissingBrowserExecutable(
+      "Failed to load external module playwright: Error: Cannot find module " +
+        "'/app/node_modules/playwright/node_modules/playwright-core/browsers.json'"
+    ),
+    true
+  );
 });
 
 test("#3516 does NOT classify a normal upstream/network error as missing-executable", () => {

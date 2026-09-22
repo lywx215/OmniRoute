@@ -13,6 +13,9 @@ export function isMissingBrowserExecutable(message: string): boolean {
     lower.includes("executable doesn't exist") ||
     lower.includes("executablenotfound") ||
     lower.includes("playwright install") ||
+    (lower.includes("playwright") &&
+      lower.includes("cannot find module") &&
+      lower.includes("browsers.json")) ||
     (lower.includes("chromium") && lower.includes("download"))
   );
 }

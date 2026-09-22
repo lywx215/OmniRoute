@@ -44,7 +44,9 @@ function seedSidecarSources(root: string) {
     "node_modules/ioredis/built/index.js",
     "node_modules/bcryptjs/package.json",
     "node_modules/bcryptjs/index.js",
+    "node_modules/playwright/index.js",
     "node_modules/playwright-core/index.js",
+    "node_modules/playwright/node_modules/playwright-core/browsers.json",
     "node_modules/sql.js/package.json",
     "node_modules/sql.js/dist/sql-wasm.js",
     "node_modules/sql.js/dist/sql-wasm.wasm",
@@ -190,6 +192,10 @@ test("async and sync sidecar copy paths produce identical bundle trees", async (
   ]) {
     assert.ok(asyncTree.includes(runtimeOnlyFile), `runtime-only dep copied: ${runtimeOnlyFile}`);
   }
+  assert.ok(
+    asyncTree.includes("node_modules/playwright/node_modules/playwright-core/browsers.json"),
+    "playwright's nested core metadata is copied so dynamic import can load in standalone builds"
+  );
   fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

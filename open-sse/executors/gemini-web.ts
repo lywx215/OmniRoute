@@ -733,8 +733,8 @@ export class GeminiWebExecutor extends BaseExecutor {
       };
     } catch (error) {
       const rawMessage = error instanceof Error ? error.message : "Unknown error";
-      // #3516: a missing Playwright browser is a host/config problem, not a transient upstream
-      // fault. Surface an actionable error and tag it with the connection-cooldown hint so
+      // #3516: a missing Playwright browser or runtime is a host/config problem, not a transient
+      // upstream fault. Surface an actionable error and tag it with the connection-cooldown hint so
       // accountFallback skips the provider circuit breaker and applies a short, non-exponential
       // cooldown instead of looping on a retryable 500.
       if (isMissingBrowserExecutable(rawMessage)) {
@@ -742,8 +742,8 @@ export class GeminiWebExecutor extends BaseExecutor {
           response: new Response(
             JSON.stringify({
               error:
-                "Gemini Web requires the Playwright Chromium browser, which is not installed. " +
-                "Run `npx playwright install chromium` on the host (or rebuild the Docker image with browsers).",
+                "Gemini Web requires a complete Playwright runtime and Chromium browser. " +
+                "Rebuild or reinstall OmniRoute, then run `npx playwright install chromium` on the host when needed.",
             }),
             {
               status: 503,
