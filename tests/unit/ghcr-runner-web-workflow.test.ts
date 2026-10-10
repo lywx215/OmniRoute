@@ -15,6 +15,23 @@ test("fork GHCR workflow has only the authorized automatic push trigger", () => 
   assert.equal(workflow.jobs.build.if, "github.repository == 'lywx215/OmniRoute'");
 });
 
+test("new upstream workflows cannot auto-trigger before API registration and disabling", () => {
+  for (const file of [
+    "claude.yml",
+    "mutation-redundancy.yml",
+    "nightly-compat.yml",
+    "nightly-mutation.yml",
+    "nightly-property.yml",
+    "opencode-provider-ci.yml",
+    "test-quarantine.yml",
+  ]) {
+    const disabled = parse(
+      fs.readFileSync(new URL(`../../.github/workflows/${file}`, import.meta.url), "utf8")
+    );
+    assert.deepEqual(Object.keys(disabled.on), ["workflow_dispatch"], file);
+  }
+});
+
 test("exactly one linux/amd64 runner-web image is validated before GHCR publication", () => {
   const steps = workflow.jobs.build.steps;
   const builds = steps.filter((step: { uses?: string }) =>

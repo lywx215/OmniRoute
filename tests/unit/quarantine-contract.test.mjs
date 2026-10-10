@@ -119,7 +119,8 @@ test("quarantine workflow executes the inventory and keeps failure/artifacts vis
   const workflow = load(
     readFileSync(new URL(".github/workflows/test-quarantine.yml", root), "utf8")
   );
-  assert.ok(workflow.on.schedule.length);
+  // Fork policy: no automatic quarantine runs; the workflow is disabled via API.
+  assert.deepEqual(Object.keys(workflow.on), ["workflow_dispatch"]);
   assert.ok(Object.hasOwn(workflow.on, "workflow_dispatch"));
   const job = workflow.jobs.quarantine;
   assert.equal(job["runs-on"], "ubuntu-latest");

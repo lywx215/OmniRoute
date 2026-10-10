@@ -1,15 +1,6 @@
 name: opencode-provider CI
 
 on:
-  push:
-    branches: [main, release/v3.8.0]
-    paths:
-      - "@omniroute/opencode-provider/**"
-  pull_request:
-    branches: [main, release/v3.8.0]
-    paths:
-      - "@omniroute/opencode-provider/**"
-    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 concurrency:

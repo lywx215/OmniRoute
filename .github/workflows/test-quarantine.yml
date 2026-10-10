@@ -1,8 +1,6 @@
 name: Quarantined Tests (debt, not admission)
 
 on:
-  schedule:
-    - cron: "17 5 * * *"
   workflow_dispatch:
 
 permissions:
