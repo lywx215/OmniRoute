@@ -12,10 +12,11 @@
  *
  * Extracted from combo.ts as a pure move (#3501). No behaviour change.
  */
-import { getCachedProviderConnections } from "../../../src/lib/db/readCache";
+import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { fisherYatesShuffle, getNextFromDeck } from "../../../src/shared/utils/shuffleDeck";
 import { handleFusionChat, type FusionTuning } from "../fusion.ts";
+import { handleAgenticPipelineChat, type AgenticOrchestrationConfig } from "../agenticPipeline.ts";
 import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
 import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
 import { parseModel } from "../model.ts";
@@ -50,6 +51,7 @@ import {
   releaseRejectedQualityResponse,
   validateResponseQuality,
 } from "./validateQuality.ts";
+import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import type {
   ComboCollectionLike,
   ComboLike,
@@ -175,7 +177,7 @@ async function isPinnedModelDurablyUnhealthy(pinnedModel: string): Promise<boole
     const provider = parseModel(pinnedModel).provider;
     if (!provider) return false;
     const circuitState = getCircuitBreaker(provider)?.getStatus?.()?.state;
-    const connections = (await getCachedProviderConnections({
+    const connections = (await getCachedProviderPoolConnections({
       provider,
       isActive: true,
     })) as Array<{
@@ -235,7 +237,9 @@ async function evaluatePinnedResponse(args: {
       pinnedClone,
       clientRequestedStream,
       log,
-      config.responseValidation
+      config.responseValidation,
+      null,
+      await isTrustedEmptyTurn(parseModel(pinnedModel).provider, pinnedResult)
     );
     releaseQualityClone(pinnedClone, pinnedResult, pinnedQuality);
     if (pinnedQuality.valid) return pinnedResult;
@@ -614,6 +618,18 @@ export async function tryPipelineDispatch(args: {
     target,
     prompt: target.prompt,
   }));
+  const agenticConfig = (combo.config as Record<string, unknown> | null | undefined)
+    ?.agenticOrchestration as AgenticOrchestrationConfig | undefined;
+  if (agenticConfig?.enabled) {
+    return handleAgenticPipelineChat({
+      body,
+      steps: pipelineSteps,
+      handleSingleModel: handleSingleModelWithTimeout,
+      log,
+      comboName: combo.name,
+      config: agenticConfig,
+    });
+  }
   return handlePipelineChat({
     body,
     steps: pipelineSteps,

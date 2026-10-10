@@ -13,12 +13,22 @@ import { Agent, buildConnector, fetch as undiciFetch, type Dispatcher } from "un
 import { getSettings, updateSettings } from "@/lib/db/settings";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { getRuntimePorts } from "@/lib/runtime/ports";
+import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 
 export const DEFAULT_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 /** Cycle-wide in-flight cap. Heap cost is total catalog JSON, not one upstream. */
 export const MODEL_SYNC_CYCLE_CONCURRENCY = 4;
 /** First cycle after boot. Past cleanup's 30s so the two jobs do not overlap. */
 export const MODEL_SYNC_STARTUP_DELAY_MS = 90_000;
+/**
+ * Phase offset (not a period change) between this scheduler's recurring tick
+ * and cleanup.ts's own 6h scheduler (#13973 — both are started back-to-back
+ * in the same boot sequence, so with the same period they collide every 6h
+ * for the process lifetime). The recurring `setInterval` is armed only after
+ * this delay, so every periodic tick lands at boot + offset + k * interval
+ * while the configured interval itself stays exactly as configured.
+ */
+export const MODEL_SYNC_STAGGER_OFFSET_MS = 45 * 60 * 1000; // 45 minutes
 const MODEL_SYNC_SETTING_KEY = "model_sync_last_run";
 const MODEL_SYNC_INTERNAL_AUTH_HEADER = "x-model-sync-internal-auth";
 
@@ -121,6 +131,8 @@ const globalState = globalThis as typeof globalThis & {
 };
 
 let schedulerTimer: NodeJS.Timeout | null = null;
+/** Pending one-shot that arms `schedulerTimer` after the phase offset. */
+let phaseTimer: NodeJS.Timeout | null = null;
 let isRunning = false;
 let internalAuthToken: string | null = null;
 
@@ -145,7 +157,26 @@ export function isModelSyncInternalRequest(request: { headers: Headers }): boole
     internalAuthToken = globalState.__omnirouteModelSyncInternalAuthToken;
   }
   const headerToken = request.headers.get(MODEL_SYNC_INTERNAL_AUTH_HEADER);
-  return Boolean(headerToken && internalAuthToken && headerToken === internalAuthToken);
+  return Boolean(
+    headerToken && internalAuthToken && timingSafeCompare(headerToken, internalAuthToken)
+  );
+}
+
+/** Providers whose connections are created with `autoSync: true` (#488). */
+const AUTO_SYNC_DEFAULT_PROVIDERS = new Set(["antigravity", "agy"]);
+
+/**
+ * Whether a connection takes part in the sync cycle.
+ *
+ * `autoSync` unset means the connection predates the family default, not that the operator
+ * opted out — those connections never refreshed their catalog again, so every model Google
+ * shipped after the connection was created stayed invisible. An explicit `false` is still
+ * honored.
+ */
+export function isAutoSyncEnabled(provider: unknown, psd: Record<string, unknown>): boolean {
+  if (psd.autoSync === true) return true;
+  if (psd.autoSync !== undefined) return false;
+  return typeof provider === "string" && AUTO_SYNC_DEFAULT_PROVIDERS.has(provider);
 }
 
 /**
@@ -169,7 +200,7 @@ async function getAutoSyncConnections(): Promise<
         conn.providerSpecificData && typeof conn.providerSpecificData === "object"
           ? (conn.providerSpecificData as Record<string, unknown>)
           : {};
-      if (psd.autoSync !== true) continue;
+      if (!isAutoSyncEnabled(conn.provider, psd)) continue;
       if (typeof conn.id !== "string" || typeof conn.provider !== "string") continue;
       autoSyncConnections.push({
         id: conn.id,
@@ -303,7 +334,7 @@ export function startModelSyncScheduler(
   apiBaseUrl = getModelSyncInternalBaseUrl(),
   intervalMs = DEFAULT_INTERVAL_MS
 ): void {
-  if (schedulerTimer) {
+  if (schedulerTimer || phaseTimer) {
     console.log("[ModelSync] Scheduler already running — skipping start");
     return;
   }
@@ -314,7 +345,10 @@ export function startModelSyncScheduler(
     !isNaN(envHours) && envHours > 0 ? envHours * 60 * 60 * 1000 : intervalMs;
   const trustedApiBaseUrl = resolveModelSyncInternalBaseUrl(apiBaseUrl);
 
-  console.log(`[ModelSync] Scheduler started — interval: ${effectiveIntervalMs / 3_600_000}h`);
+  console.log(
+    `[ModelSync] Scheduler started — interval: ${effectiveIntervalMs / 3_600_000}h ` +
+      `(phase offset +${MODEL_SYNC_STAGGER_OFFSET_MS / 60_000}m)`
+  );
 
   // Serve traffic first; cleanup's first pass is +30s, so stay past that window.
   const startupDelay = setTimeout(
@@ -332,15 +366,26 @@ export function startModelSyncScheduler(
       // silent
     });
 
-  // Then run on the regular interval
-  schedulerTimer = setInterval(() => runSyncCycle(trustedApiBaseUrl), effectiveIntervalMs);
-  schedulerTimer.unref?.();
+  // Then run on the regular interval, phase-shifted against cleanup.ts's
+  // own 6h scheduler (#13973). The period stays `effectiveIntervalMs`; only
+  // the moment the interval is armed moves.
+  phaseTimer = setTimeout(() => {
+    phaseTimer = null;
+    schedulerTimer = setInterval(() => runSyncCycle(trustedApiBaseUrl), effectiveIntervalMs);
+    schedulerTimer.unref?.();
+  }, MODEL_SYNC_STAGGER_OFFSET_MS);
+  phaseTimer.unref?.();
 }
 
 /**
  * Stop the model sync scheduler.
  */
 export function stopModelSyncScheduler(): void {
+  if (phaseTimer) {
+    clearTimeout(phaseTimer);
+    phaseTimer = null;
+    console.log("[ModelSync] Scheduler stopped");
+  }
   if (schedulerTimer) {
     clearInterval(schedulerTimer);
     schedulerTimer = null;

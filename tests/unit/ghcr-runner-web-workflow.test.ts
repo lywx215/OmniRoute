@@ -1,0 +1,38 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { test } from "node:test";
+import { parse } from "yaml";
+
+const workflow = parse(
+  fs.readFileSync(new URL("../../.github/workflows/ghcr-runner-web.yml", import.meta.url), "utf8")
+);
+
+test("fork GHCR workflow has only the authorized automatic push trigger", () => {
+  assert.deepEqual(Object.keys(workflow.on), ["push"]);
+  assert.deepEqual(workflow.on.push.branches, ["main", "codex/sync-upstream-20261010"]);
+  assert.deepEqual(Object.keys(workflow.jobs), ["build"]);
+  assert.equal(workflow.jobs.build.strategy, undefined);
+  assert.equal(workflow.jobs.build.if, "github.repository == 'lywx215/OmniRoute'");
+});
+
+test("exactly one linux/amd64 runner-web image is validated before GHCR publication", () => {
+  const steps = workflow.jobs.build.steps;
+  const builds = steps.filter((step: { uses?: string }) =>
+    step.uses?.startsWith("docker/build-push-action@")
+  );
+  assert.equal(builds.length, 1);
+  assert.equal(builds[0].with.target, "runner-web");
+  assert.equal(builds[0].with.platforms, "linux/amd64");
+  assert.equal(builds[0].with.load, true);
+  assert.equal(builds[0].with.push, false);
+  const verification = steps.findIndex((step: { run?: string }) =>
+    step.run?.includes("verify-runner-web-image.mjs")
+  );
+  const publication = steps.findIndex((step: { run?: string }) =>
+    step.run?.includes("docker push")
+  );
+  assert.ok(verification >= 0 && publication > verification);
+  assert.match(workflow.jobs.build.env.IMAGE_REF, /^ghcr\.io\/lywx215\/omniroute:/);
+  assert.equal(workflow.jobs.build.permissions.packages, "write");
+  assert.ok(!JSON.stringify(workflow).includes("ZEABUR_TOKEN"));
+});

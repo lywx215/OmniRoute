@@ -97,8 +97,11 @@ host answers **`422`** with `containerEphemeralTarget: true`, the safe error
 text and — for the tools with a host recipe (claude, codex, opencode, cline,
 kilo, continue) — a `hostSetupCommand` (e.g. `omniroute setup-opencode`) to run
 on the host instead; nothing is written. `dryRun: true` keeps working in container
-mode and returns the generated content + target path without touching disk, so
-you can preview from the dashboard and apply on the host. This behavior is
+mode and returns a redacted preview + target path without touching disk. Preview
+content is not a credential-bearing configuration to copy or import. Apply with
+the original tool/base URL/API key/model inputs on the host, or use the indicated
+host-side setup command. See [CLI configuration security](../security/CLI-CONFIGURATION.md)
+for the preview header and request contract. This behavior is
 intentional and regression-guarded by
 `tests/unit/api/cli-tools/apply-container-guard.test.ts` — never "fix" a 422
 by removing the guard.
@@ -686,6 +689,18 @@ redacted presence/shape. `providers available` reads the OmniRoute catalog;
 `providers list/test/test-all/validate` retain their local SQLite behavior and
 do not require the server to be running.
 
+For a custom OpenAI-compatible or Anthropic-compatible node, attach credentials to
+the node ID returned by `omniroute nodes add`, using `omniroute keys add "$NODE_ID" --stdin`.
+This requires a running server and management authentication for the active context.
+The CLI uses `POST /api/providers`, which validates the node and copies its endpoint
+settings into the connection. A missing node, authorization failure, or unavailable
+server returns an error without creating a local fallback credential.
+
+`nodes add --base-url` sets the node endpoint; it is distinct from the server address
+in `OMNIROUTE_BASE_URL`. For OpenAPI files, use
+`omniroute openapi dump --format json --out ./openapi.json`; the global `--output`
+selects CLI display formatting, not a destination filename.
+
 ### Recovery & Reset
 
 ```bash
@@ -718,7 +733,7 @@ These assume a running OmniRoute server, unless noted otherwise:
 ```bash
 omniroute status                       # Comprehensive runtime status
 omniroute logs                         # Stream request logs (--json, --search, --follow)
-omniroute config show                  # Display current configuration
+omniroute config list                  # Display configured CLI tools
 
 omniroute provider list                # List available providers (alias of providers list)
 omniroute provider add                 # Register OmniRoute as a provider on a tool
