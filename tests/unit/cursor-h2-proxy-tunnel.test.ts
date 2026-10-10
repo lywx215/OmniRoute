@@ -14,6 +14,7 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import net from "node:net";
+import tls from "node:tls";
 import test from "node:test";
 
 import {
@@ -262,6 +263,35 @@ test("a tunneled socket is released on stream close and on abort", () => {
  * CONNECT in cleartext makes the proxy drop the connection — and would put
  * Proxy-Authorization on the wire unencrypted.
  */
+test("HTTPS proxy SNI uses only DNS names and keeps certificate verification enabled", async (t) => {
+  for (const host of ["127.0.0.1", "[::1]", "proxy.example"]) {
+    let captured: tls.ConnectionOptions | undefined;
+    const connect = t.mock.method(tls, "connect", (options: tls.ConnectionOptions) => {
+      captured = options;
+      return new tls.TLSSocket(new net.Socket());
+    });
+    const controller = new AbortController();
+    controller.abort();
+    try {
+      await assert.rejects(
+        createProxyTunnelSocket({
+          targetHost: "api5.cursor.sh",
+          targetPort: 443,
+          proxyUrl: `https://${host}:8443`,
+          signal: controller.signal,
+        }),
+        /aborted/
+      );
+      assert.ok(captured);
+      assert.equal(captured.host, host === "[::1]" ? "::1" : host);
+      assert.equal(captured.servername, host === "proxy.example" ? host : undefined);
+      assert.notEqual(captured.rejectUnauthorized, false);
+    } finally {
+      connect.mock.restore();
+    }
+  }
+});
+
 test("an https:// proxy receives a TLS ClientHello before any CONNECT bytes", async () => {
   let firstBytes: Buffer | null = null;
   const proxy = net.createServer((client) => {

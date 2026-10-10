@@ -41,9 +41,15 @@ function builderStageRange(): { start: number; end: number } {
 test("#6700 builder stage compiles better-sqlite3 via a direct node-gyp rebuild, not `npm rebuild`", () => {
   const { start, end } = builderStageRange();
   const stage = lines.slice(start, end).join("\n");
+  // The optional Node header mirror setup does not change which package or
+  // builder invokes node-gyp. Remove only that exact environment-only step.
+  const nativeBuild = stage.replace(
+    /^\s*&& if \[ -n "\$\{NODE_DIST_URL\}" \]; then export NODEJS_ORG_MIRROR="\$\{NODE_DIST_URL\}"; fi\s*\\\s*$/gm,
+    ""
+  );
 
   assert.match(
-    stage,
+    nativeBuild,
     /cd node_modules\/better-sqlite3\s*(\\\s*)?&&\s*(npx\s+(--yes\s+)?node-gyp|node \/usr\/local\/lib\/node_modules\/npm\/node_modules\/node-gyp\/bin\/node-gyp\.js) rebuild/,
     "builder stage must compile better-sqlite3 by invoking node-gyp directly inside its " +
       "package directory (bypasses npm's rebuild-script indirection)"

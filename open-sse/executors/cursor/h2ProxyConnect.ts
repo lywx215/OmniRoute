@@ -213,12 +213,19 @@ export function createProxyTunnelSocket(options: ProxyTunnelOptions): Promise<ne
     let buffered = Buffer.alloc(0);
 
     const isTlsProxy = proxy.protocol === "https:";
+    const proxyHost = proxy.hostname.replace(/^\[|\]$/g, "");
     const port = Number(proxy.port) || (isTlsProxy ? 443 : 80);
     // An https:// proxy speaks TLS before CONNECT. Writing CONNECT in cleartext
     // makes it drop the connection and would expose Proxy-Authorization.
     const socket: net.Socket = isTlsProxy
-      ? tls.connect({ host: proxy.hostname, port, servername: proxy.hostname })
-      : net.connect({ host: proxy.hostname, port });
+      ? tls.connect({
+          host: proxyHost,
+          port,
+          // RFC 6066 disallows IP literals in SNI; Node 25+ rejects them.
+          // Leave certificate verification enabled against the connection host.
+          servername: net.isIP(proxyHost) ? undefined : proxyHost,
+        })
+      : net.connect({ host: proxyHost, port });
     const readyEvent = isTlsProxy ? "secureConnect" : "connect";
 
     const timer = setTimeout(() => {
