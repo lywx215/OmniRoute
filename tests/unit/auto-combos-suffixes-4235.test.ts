@@ -116,7 +116,9 @@ test("every pack carries quality>0 and reliability>0", () => {
 });
 
 test("#4235 createBuiltinAutoCombo composes tier weights for auto/coding:fast", async () => {
+  await seedProviders();
   const combo = await builtinCatalog.createBuiltinAutoCombo("auto/coding:fast", "coding:fast");
+  assert.ok(combo.models.length > 0, "exercise tier composition, not the empty-pool fallback");
   assert.equal(combo.id, "auto/coding:fast");
   assert.equal(combo.strategy, "auto");
   // :fast → ship-fast weights (latency-dominant)
@@ -124,10 +126,12 @@ test("#4235 createBuiltinAutoCombo composes tier weights for auto/coding:fast", 
 });
 
 test("#4235 createBuiltinAutoCombo composes reliability weights for auto/coding:reliable", async () => {
+  await seedProviders();
   const combo = await builtinCatalog.createBuiltinAutoCombo(
     "auto/coding:reliable",
     "coding:reliable"
   );
+  assert.ok(combo.models.length > 0, "exercise tier composition, not the empty-pool fallback");
   assert.deepEqual(combo.weights, modePacks.MODE_PACKS["reliability-first"]);
 });
 

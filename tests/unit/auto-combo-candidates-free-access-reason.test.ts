@@ -47,6 +47,9 @@ async function seedConnection() {
 
 test.beforeEach(async () => {
   await resetStorage();
+  // #15059 defaults the independent ToS guard to on. This suite isolates the
+  // strict-zero-cost inspector contract using Antigravity fixtures.
+  await settingsDb.updateSettings({ excludeTosAvoid: false });
 });
 
 test.after(async () => {

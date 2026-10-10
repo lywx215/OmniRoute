@@ -83,7 +83,7 @@ test("exhaustion lines carry the request id", async (t) => {
     // persist flag, combo flag, headers AND the id together.
     assert.match(
       chatSource,
-      /buildExhaustionOptions\(runtimeOptions\.correlationId \?\? null, \{\s*persistUnavailableState: !\([\s\S]*?headers: result\.response\.headers,\s*\}\)/,
+      /buildExhaustionOptions\(runtimeOptions\.correlationId \?\? null, \{\s*persistUnavailableState: !\([\s\S]*?headers: result\.response\.headers,\s*structuredError: \{ code: result\.errorCode, type: result\.errorType \},\s*\}\)/,
       "chat.ts:2383 fallback sender must forward the id alongside the existing options literal"
     );
     // The exhaustion caller passes the id positionally (10th arg), not a bare
