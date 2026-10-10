@@ -95,7 +95,7 @@ jobs:
           sbom: false
 
       - name: Verify the exact image before publishing
-        run: node scripts/ci/verify-runner-web-image.mjs
+        run: node scripts/ci/verify-runner-web-image.mjs "$IMAGE_REF"
 
       - name: Publish the validated image
         run: |

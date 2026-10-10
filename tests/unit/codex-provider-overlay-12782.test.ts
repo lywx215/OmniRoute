@@ -52,7 +52,8 @@ test("setup defines its missing provider in the overlay and preserves the base c
   const profile = overlay(codexHome);
   assert.equal(profile.model, "auto/best-coding");
   assert.equal(profile.model_provider, "omniroute");
-  assert.deepEqual(profile.model_providers, {
+  // smol-toml returns null-prototype tables; compare the serialized TOML data.
+  assert.deepEqual(JSON.parse(JSON.stringify(profile.model_providers)), {
     omniroute: {
       name: "OmniRoute",
       base_url: "https://proxy.example/v1",
@@ -70,7 +71,7 @@ test("fresh local setup needs no base config and uses the selected port", async 
     0
   );
   const profile = overlay(codexHome);
-  assert.deepEqual(profile.model_providers, {
+  assert.deepEqual(JSON.parse(JSON.stringify(profile.model_providers)), {
     omniroute: {
       name: "OmniRoute",
       base_url: "http://localhost:21456/v1",

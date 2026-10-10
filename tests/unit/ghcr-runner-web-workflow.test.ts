@@ -49,6 +49,13 @@ test("exactly one linux/amd64 runner-web image is validated before GHCR publicat
     step.run?.includes("docker push")
   );
   assert.ok(verification >= 0 && publication > verification);
+  assert.equal(steps[verification].run, 'node scripts/ci/verify-runner-web-image.mjs "$IMAGE_REF"');
+  const verifier = fs.readFileSync(
+    new URL("../../scripts/ci/verify-runner-web-image.mjs", import.meta.url),
+    "utf8"
+  );
+  assert.match(verifier, /const imageRef = process\.argv\[2\]/);
+  assert.ok(!verifier.includes("process.env.IMAGE_REF"));
   assert.match(workflow.jobs.build.env.IMAGE_REF, /^ghcr\.io\/lywx215\/omniroute:/);
   assert.equal(workflow.jobs.build.permissions.packages, "write");
   assert.ok(!JSON.stringify(workflow).includes("ZEABUR_TOKEN"));

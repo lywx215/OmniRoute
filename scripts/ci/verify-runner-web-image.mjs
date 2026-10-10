@@ -3,7 +3,8 @@ import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 
-const imageRef = process.env.IMAGE_REF;
+// This is a CI tool argument, not an OmniRoute runtime environment setting.
+const imageRef = process.argv[2];
 const revision = process.env.GITHUB_SHA;
 assert.match(imageRef || "", /^ghcr\.io\/lywx215\/omniroute:sha-[a-f0-9]{40}-web$/);
 assert.match(revision || "", /^[a-f0-9]{40}$/);

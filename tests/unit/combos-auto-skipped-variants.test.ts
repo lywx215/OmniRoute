@@ -77,6 +77,12 @@ async function callRoute(): Promise<{ status: number; combos: Array<{ id: string
   return { status: res.status, combos: (await res.json()).combos };
 }
 
+test.before(async () => {
+  // Exercise pack failure handling with the no-auth fixture pool available;
+  // the independent default-on ToS filter otherwise empties that pool.
+  await settingsDb.updateSettings({ requireLogin: false, excludeTosAvoid: false });
+});
+
 test.after(() => {
   restorePacks();
   core.resetDbInstance();
