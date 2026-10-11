@@ -168,6 +168,9 @@ python3 scripts/ops/prepare-zeabur-web.py \
 
 ## 6. 维护这些保护措施
 
+发布前增加 `npm run i18n:check-routes`，检查路由实际收到的翻译集合。
+本次全量检查及中文遗漏修订见 [界面翻译审计](./I18N_DEPLOYMENT_AUDIT.md)。
+
 关键回归检查：
 
 ```bash

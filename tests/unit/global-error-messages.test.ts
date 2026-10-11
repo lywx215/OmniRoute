@@ -57,6 +57,16 @@ test("global-error.tsx does not statically import a full locale catalog", () => 
   );
 });
 
+test("global-error uses the same alias-aware locale resolver as normal pages", () => {
+  const source = readFileSync(join(REPO_ROOT, "src", "app", "global-error.tsx"), "utf8");
+  assert.match(
+    source,
+    /import \{ resolveRequestedLocale \} from "@\/i18n\/resolveRequestedLocale"/
+  );
+  assert.match(source, /resolveRequestedLocale\(locale, LOCALES, LOCALE_ALIASES, DEFAULT_LOCALE\)/);
+  assert.doesNotMatch(source, /LOCALES\.includes\(locale\) \? locale : DEFAULT_LOCALE/);
+});
+
 test("compact catalogs preserve every translated error string without unrelated namespaces", () => {
   const config = JSON.parse(readFileSync(join(REPO_ROOT, "config/i18n.json"), "utf8"));
   const english = JSON.parse(readFileSync(join(REPO_ROOT, "src/i18n/messages/en.json"), "utf8"));

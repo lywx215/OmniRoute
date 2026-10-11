@@ -2,7 +2,8 @@
 
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { DEFAULT_LOCALE, LOCALES, LOCALE_COOKIE } from "@/i18n/config";
+import { DEFAULT_LOCALE, LOCALES, LOCALE_COOKIE, LOCALE_ALIASES } from "@/i18n/config";
+import { resolveRequestedLocale } from "@/i18n/resolveRequestedLocale";
 
 /**
  * Global Error Page — FASE-04 Error Handling
@@ -48,7 +49,7 @@ function getCookieLocale() {
     .map((entry) => entry.trim())
     .find((entry) => entry.startsWith(`${LOCALE_COOKIE}=`));
   const locale = cookie?.slice(`${LOCALE_COOKIE}=`.length) || DEFAULT_LOCALE;
-  return LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
+  return resolveRequestedLocale(locale, LOCALES, LOCALE_ALIASES, DEFAULT_LOCALE);
 }
 
 function buildGlobalErrorMessages(localeMessages: Record<string, unknown>) {

@@ -1642,6 +1642,7 @@
       "kiroAuthModal",
       "kiroSocialOAuthModal",
       "landing",
+      "mitm",
       "noAuthProvider",
       "oauthModal",
       "proxyConfigModal",
