@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Créditos pagos do Codex desabilitados",
     "failedUpdateCodexPaidCredits": "Falha ao atualizar a política de créditos pagos do Codex",
     "allowCodexPaidCreditsLabel": "Permitir créditos pagos do Codex",
-    "allowCodexPaidCreditsDescription": "Permite que esta conta use créditos pagos depois que a cota da assinatura atingir o limite de corte. Requer créditos disponíveis informados pela OpenAI; pode gerar cobranças. Os limites do Spark e os cooldowns do upstream continuam se aplicando. A disponibilidade de créditos é verificada mesmo se o preflight de cota estiver desabilitado."
+    "allowCodexPaidCreditsDescription": "Permite que esta conta use créditos pagos depois que a cota da assinatura atingir o limite de corte. Requer créditos disponíveis informados pela OpenAI; pode gerar cobranças. Os limites do Spark e os cooldowns do upstream continuam se aplicando. A disponibilidade de créditos é verificada mesmo se o preflight de cota estiver desabilitado.",
+    "geminiDailyQuotaTitle": "Limites diários de solicitações",
+    "geminiDailyQuotaDescription": "Os limites se aplicam separadamente a cada modelo. As contagens incluem tentativas de solicitações ao provedor pelo OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Ignorar limites locais de RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Os limites diários e os controles de concorrência continuam ativos; os limites do provedor ainda se aplicam.",
+    "geminiDailyQuotaReset": "Redefine às {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} usados · {remaining} restantes",
+    "geminiDailyQuotaEmpty": "As contagens por modelo aparecem após a primeira solicitação.",
+    "geminiDailyQuotaBulk": "Aplicar limites diários a todas as conexões Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "{count} conexões atualizadas; {failed} falharam."
   },
   "settings": {
     "title": "Configurações",

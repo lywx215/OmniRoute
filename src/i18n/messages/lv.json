@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Dienas pieprasījumu limiti",
+    "geminiDailyQuotaDescription": "Limiti tiek piemēroti katram modelim atsevišķi. Skaitītāji ietver pieprasījumu mēģinājumus pakalpojuma sniedzējam caur OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Izlaist vietējos RPM / TPM limitus",
+    "geminiDailyQuotaMinuteLimitsDescription": "Dienas limiti un vienlaicīguma kontrole paliek aktīvi; pakalpojuma sniedzēja limiti joprojām ir spēkā.",
+    "geminiDailyQuotaReset": "Atiestatīšana plkst. {time} PT",
+    "geminiDailyQuotaUsage": "Izmantoti {used}/{limit} · atlikuši {remaining}",
+    "geminiDailyQuotaEmpty": "Modeļu skaitītāji parādās pēc pirmā pieprasījuma.",
+    "geminiDailyQuotaBulk": "Piemērot dienas limitus visiem Gemini savienojumiem ({count})",
+    "geminiDailyQuotaBulkResult": "Atjaunināti {count} savienojumi; {failed} neizdevās."
   },
   "settings": {
     "title": "Iestatījumi",

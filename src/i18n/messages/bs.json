@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "Dnevna ograničenja zahtjeva",
+    "geminiDailyQuotaDescription": "Ograničenja se primjenjuju zasebno na svaki model. Brojači uključuju pokušaje zahtjeva prema pružaocu kroz OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Preskoči lokalna RPM / TPM ograničenja",
+    "geminiDailyQuotaMinuteLimitsDescription": "Dnevna ograničenja i kontrola istovremenosti ostaju aktivni; ograničenja pružaoca i dalje važe.",
+    "geminiDailyQuotaReset": "Resetovanje u {time} PT",
+    "geminiDailyQuotaUsage": "Iskorišteno {used}/{limit} · preostalo {remaining}",
+    "geminiDailyQuotaEmpty": "Brojači modela se prikazuju nakon prvog zahtjeva.",
+    "geminiDailyQuotaBulk": "Primijeni dnevna ograničenja na sve Gemini veze ({count})",
+    "geminiDailyQuotaBulkResult": "Ažurirano veza: {count}; neuspjelih: {failed}."
   },
   "settings": {
     "title": "Postavke",

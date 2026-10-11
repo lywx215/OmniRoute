@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "Ààlà ìbéèrè ojoojúmọ́",
+    "geminiDailyQuotaDescription": "Ààlà kan àwòṣe kọ̀ọ̀kan lọ́tọ̀. Kíkà náà ní àwọn ìgbìyànjú ìbéèrè sí olùpèsè nípasẹ̀ OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Fo ààlà RPM / TPM ti agbègbè",
+    "geminiDailyQuotaMinuteLimitsDescription": "Ààlà ojoojúmọ́ àti ìṣàkóso ìbéèrè papọ̀ ṣì ń ṣiṣẹ́; ààlà olùpèsè ṣì wà.",
+    "geminiDailyQuotaReset": "A tún un ṣe ní {time} PT",
+    "geminiDailyQuotaUsage": "A ti lo {used}/{limit} · {remaining} kù",
+    "geminiDailyQuotaEmpty": "Kíkà àwòṣe máa hàn lẹ́yìn ìbéèrè àkọ́kọ́.",
+    "geminiDailyQuotaBulk": "Fi ààlà ojoojúmọ́ sí gbogbo ìsopọ̀ Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "A ti ṣe àtúnṣe ìsopọ̀ {count}; {failed} kùnà."
   },
   "settings": {
     "title": "Àwọn Ààtò",

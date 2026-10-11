@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Dnevna ograničenja zahtjeva",
+    "geminiDailyQuotaDescription": "Ograničenja se primjenjuju zasebno na svaki model. Brojači uključuju pokušaje zahtjeva prema pružatelju putem OmniRoutea.",
+    "geminiDailyQuotaMinuteLimits": "Preskoči lokalna RPM / TPM ograničenja",
+    "geminiDailyQuotaMinuteLimitsDescription": "Dnevna ograničenja i kontrola istodobnosti ostaju aktivni; ograničenja pružatelja i dalje vrijede.",
+    "geminiDailyQuotaReset": "Ponovno postavljanje u {time} PT",
+    "geminiDailyQuotaUsage": "Iskorišteno {used}/{limit} · preostalo {remaining}",
+    "geminiDailyQuotaEmpty": "Brojači modela prikazuju se nakon prvog zahtjeva.",
+    "geminiDailyQuotaBulk": "Primijeni dnevna ograničenja na sve Gemini veze ({count})",
+    "geminiDailyQuotaBulkResult": "Ažurirane veze: {count}; neuspjele: {failed}."
   },
   "settings": {
     "title": "Postavke",

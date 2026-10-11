@@ -1,4 +1,5 @@
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
+import { createGeminiDailyQuotaErrorResult } from "../../services/geminiDailyQuota.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
 
@@ -371,21 +372,29 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     }
   } catch (error) {
     trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    const errorCarry = {
+      translatedBody,
+      currentModel,
+      effectiveServiceTier,
+      finalBody,
+      pipelineRecovered,
+      providerHeaders,
+      providerResponse,
+      providerUrl,
+    };
+    const dailyQuotaResult = createGeminiDailyQuotaErrorResult(error, stream);
+    if (dailyQuotaResult) {
+      return {
+        response: dailyQuotaResult,
+        carry: errorCarry,
+      };
+    }
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)
       return {
         response: managedLeaseFenceErrorResult(managedLeaseFenceCode),
-        carry: {
-          translatedBody,
-          currentModel,
-          effectiveServiceTier,
-          finalBody,
-          pipelineRecovered,
-          providerHeaders,
-          providerResponse,
-          providerUrl,
-        },
+        carry: errorCarry,
       };
     // isSemaphoreCapacityError already reads the code through getSafeErrorMetadata,
     // so a hostile rejection cannot escape this classification.
@@ -416,16 +425,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           errorType: "account_semaphore_capacity",
           errorCode: semaphoreCode,
         },
-        carry: {
-          translatedBody,
-          currentModel,
-          effectiveServiceTier,
-          finalBody,
-          pipelineRecovered,
-          providerHeaders,
-          providerResponse,
-          providerUrl,
-        },
+        carry: errorCarry,
       };
     }
     // abort(reason) can reject with a raw string lacking `name`/`status`; classify
@@ -513,16 +513,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       streamController.handleError(createSafeAbortError());
       return {
         response: createErrorResult(499, "Request aborted"),
-        carry: {
-          translatedBody,
-          currentModel,
-          effectiveServiceTier,
-          finalBody,
-          pipelineRecovered,
-          providerHeaders,
-          providerResponse,
-          providerUrl,
-        },
+        carry: errorCarry,
       };
     }
     const persistentErrorCode = projectFailureUsageErrorCode({
@@ -550,16 +541,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           errorType: upstreamErrorType,
           errorCode: upstreamErrorCode,
         },
-        carry: {
-          translatedBody,
-          currentModel,
-          effectiveServiceTier,
-          finalBody,
-          pipelineRecovered,
-          providerHeaders,
-          providerResponse,
-          providerUrl,
-        },
+        carry: errorCarry,
       };
     }
     const result = createErrorResult(
@@ -572,16 +554,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     localLimiterErrors.markTrustedLocalRateLimitResponse(result.response, error);
     return {
       response: result,
-      carry: {
-        translatedBody,
-        currentModel,
-        effectiveServiceTier,
-        finalBody,
-        pipelineRecovered,
-        providerHeaders,
-        providerResponse,
-        providerUrl,
-      },
+      carry: errorCarry,
     };
   }
   let upstreamErrorParsed = false;

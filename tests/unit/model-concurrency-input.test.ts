@@ -53,7 +53,11 @@ describe("parseModelConcurrencyInput", () => {
   });
 });
 
-const { buildRateLimitOverridesFromForm, modelConcurrencyFormValue } =
+const {
+  buildRateLimitOverridesFromForm,
+  getRateLimitOverridesFormValues,
+  modelConcurrencyFormValue,
+} =
   await import("../../src/app/(dashboard)/dashboard/providers/[id]/components/modals/rateLimitOverridesFromForm.ts");
 
 const blankForm = {
@@ -66,6 +70,27 @@ const blankForm = {
   rateLimitMaxConcurrent: "",
   modelConcurrency: "",
 };
+
+describe("getRateLimitOverridesFormValues", () => {
+  it("restores inherited fields as blank and retains explicit zeroes and model caps", () => {
+    assert.deepEqual(getRateLimitOverridesFormValues(null), blankForm);
+    assert.deepEqual(
+      getRateLimitOverridesFormValues({
+        rpm: 0,
+        tpm: 250000,
+        maxConcurrent: 4,
+        modelConcurrency: { "gemini-2.5-flash": 2 },
+      }),
+      {
+        ...blankForm,
+        rpm: "0",
+        tpm: "250000",
+        rateLimitMaxConcurrent: "4",
+        modelConcurrency: "gemini-2.5-flash=2",
+      }
+    );
+  });
+});
 
 describe("buildRateLimitOverridesFromForm", () => {
   it("returns null overrides for a blank form", () => {

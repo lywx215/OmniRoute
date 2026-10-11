@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Teorainneacha iarratas laethúla",
+    "geminiDailyQuotaDescription": "Baineann na teorainneacha le gach samhail ar leith. Áirítear iarrachtaí iarratas chuig an soláthraí trí OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Scipeáil teorainneacha áitiúla RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Fanann teorainneacha laethúla agus rialuithe comhthráthachta gníomhach; bíonn teorainneacha an tsoláthraí i bhfeidhm fós.",
+    "geminiDailyQuotaReset": "Athshocraítear ag {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} úsáidte · {remaining} fágtha",
+    "geminiDailyQuotaEmpty": "Taispeántar cuntair na samhlacha tar éis an chéad iarratais.",
+    "geminiDailyQuotaBulk": "Cuir teorainneacha laethúla i bhfeidhm ar gach nasc Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Nuashonraíodh {count} nasc; theip ar {failed}."
   },
   "settings": {
     "title": "Socruithe",

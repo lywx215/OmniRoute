@@ -1,5 +1,6 @@
 import { checkFallbackError, type ProviderProfile } from "../accountFallback.ts";
 import { classifyGeminiQuotaMetricFromText } from "../geminiRateLimitTracker.ts";
+import { isGeminiDailyQuotaResponse } from "../geminiDailyQuota.ts";
 
 const TERMINAL_QUOTA_CODES = new Set([
   "billing_hard_limit_reached",
@@ -63,6 +64,7 @@ export async function isQuotaExhaustionResponse(
   model: string | null,
   profile: ProviderProfile | null = null
 ): Promise<boolean> {
+  if (isGeminiDailyQuotaResponse(response)) return true;
   const trusted = trustedClassifications.get(response);
   if (trusted !== undefined) return trusted;
 

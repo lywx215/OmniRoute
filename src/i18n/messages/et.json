@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Päevased päringupiirangud",
+    "geminiDailyQuotaDescription": "Piirangud kehtivad iga mudeli kohta eraldi. Loend sisaldab teenusepakkujale OmniRoute kaudu tehtud päringukatseid.",
+    "geminiDailyQuotaMinuteLimits": "Jäta kohalikud RPM / TPM piirangud vahele",
+    "geminiDailyQuotaMinuteLimitsDescription": "Päevased piirangud ja samaaegsuse kontroll jäävad aktiivseks; teenusepakkuja piirangud kehtivad endiselt.",
+    "geminiDailyQuotaReset": "Lähtestatakse kell {time} PT",
+    "geminiDailyQuotaUsage": "Kasutatud {used}/{limit} · alles {remaining}",
+    "geminiDailyQuotaEmpty": "Mudelite loendurid ilmuvad pärast esimest päringut.",
+    "geminiDailyQuotaBulk": "Rakenda päevased piirangud kõigile Gemini ühendustele ({count})",
+    "geminiDailyQuotaBulkResult": "Uuendatud ühendusi: {count}; ebaõnnestunud: {failed}."
   },
   "settings": {
     "title": "Seaded",

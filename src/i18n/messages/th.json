@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "ขีดจำกัดคำขอรายวัน",
+    "geminiDailyQuotaDescription": "ขีดจำกัดใช้แยกกันสำหรับแต่ละโมเดล โดยนับรวมความพยายามส่งคำขอไปยังผู้ให้บริการผ่าน OmniRoute",
+    "geminiDailyQuotaMinuteLimits": "ข้ามขีดจำกัด RPM / TPM ภายใน",
+    "geminiDailyQuotaMinuteLimitsDescription": "ขีดจำกัดรายวันและการควบคุมคำขอพร้อมกันยังทำงานอยู่ และขีดจำกัดของผู้ให้บริการยังมีผล",
+    "geminiDailyQuotaReset": "รีเซ็ตเวลา {time} PT",
+    "geminiDailyQuotaUsage": "ใช้แล้ว {used}/{limit} · เหลือ {remaining}",
+    "geminiDailyQuotaEmpty": "จำนวนของแต่ละโมเดลจะแสดงหลังคำขอแรก",
+    "geminiDailyQuotaBulk": "ใช้ขีดจำกัดรายวันกับการเชื่อมต่อ Gemini ทั้งหมด ({count})",
+    "geminiDailyQuotaBulkResult": "อัปเดตการเชื่อมต่อ {count} รายการ; ล้มเหลว {failed} รายการ"
   },
   "settings": {
     "title": "การตั้งค่า",

@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "နေ့စဉ် တောင်းဆိုမှု ကန့်သတ်ချက်များ",
+    "geminiDailyQuotaDescription": "ကန့်သတ်ချက်များသည် မော်ဒယ်တစ်ခုစီအတွက် သီးခြားသက်ရောက်သည်။ အရေအတွက်တွင် OmniRoute မှတစ်ဆင့် ပံ့ပိုးသူထံ တောင်းဆိုရန် ကြိုးပမ်းမှုများ ပါဝင်သည်။",
+    "geminiDailyQuotaMinuteLimits": "ဒေသတွင်း RPM / TPM ကန့်သတ်ချက်များကို ကျော်ရန်",
+    "geminiDailyQuotaMinuteLimitsDescription": "နေ့စဉ်ကန့်သတ်ချက်နှင့် တစ်ပြိုင်နက်တောင်းဆိုမှု ထိန်းချုပ်ခြင်းတို့ ဆက်လက်အလုပ်လုပ်ပြီး ပံ့ပိုးသူ၏ ကန့်သတ်ချက်များလည်း သက်ရောက်သည်။",
+    "geminiDailyQuotaReset": "{time} PT တွင် ပြန်လည်သတ်မှတ်မည်",
+    "geminiDailyQuotaUsage": "{used}/{limit} သုံးပြီး · {remaining} ကျန်ရှိ",
+    "geminiDailyQuotaEmpty": "ပထမဆုံးတောင်းဆိုမှုအပြီး မော်ဒယ်အရေအတွက်များ ပေါ်လာမည်။",
+    "geminiDailyQuotaBulk": "Gemini ချိတ်ဆက်မှုအားလုံးတွင် နေ့စဉ်ကန့်သတ်ချက်များ သတ်မှတ်ရန် ({count})",
+    "geminiDailyQuotaBulkResult": "ချိတ်ဆက်မှု {count} ခုကို ပြင်ဆင်ပြီး၊ {failed} ခု မအောင်မြင်ပါ။"
   },
   "settings": {
     "title": "ဆက်တင်များ",

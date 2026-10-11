@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "දෛනික ඉල්ලීම් සීමා",
+    "geminiDailyQuotaDescription": "එක් එක් මාදිලියට සීමා වෙන වෙනම අදාළ වේ. ගණන්වලට OmniRoute හරහා සැපයුම්කරුට ඉල්ලීම් යැවීමේ උත්සාහද ඇතුළත් වේ.",
+    "geminiDailyQuotaMinuteLimits": "දේශීය RPM / TPM සීමා මඟහරින්න",
+    "geminiDailyQuotaMinuteLimitsDescription": "දෛනික සීමා සහ එකවර ඉල්ලීම් පාලනය සක්‍රියව පවතී; සැපයුම්කරුගේ සීමාද තවදුරටත් අදාළ වේ.",
+    "geminiDailyQuotaReset": "{time} PT හිදී යළි සකසයි",
+    "geminiDailyQuotaUsage": "{used}/{limit} භාවිතා කර ඇත · {remaining} ඉතිරිව ඇත",
+    "geminiDailyQuotaEmpty": "පළමු ඉල්ලීමෙන් පසු මාදිලියේ ගණන් පෙන්වයි.",
+    "geminiDailyQuotaBulk": "සියලු Gemini සම්බන්ධතා සඳහා දෛනික සීමා යොදන්න ({count})",
+    "geminiDailyQuotaBulkResult": "සම්බන්ධතා {count} යාවත්කාලීන විය; {failed} අසාර්ථක විය."
   },
   "settings": {
     "title": "සැකසුම්",

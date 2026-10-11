@@ -14,11 +14,7 @@ import {
   getCachedProviderConnections,
 } from "../../../src/lib/db/readCache.ts";
 import { getProviderAlias, resolveProviderId } from "../../../src/shared/constants/providers.ts";
-import {
-  errorResponse,
-  errorResponseWithComboDiagnostics,
-  unavailableResponse,
-} from "../../utils/error.ts";
+import { errorResponse, errorResponseWithComboDiagnostics } from "../../utils/error.ts";
 import { estimateSizeFast } from "../../utils/estimateSize.ts";
 import { jsonLength } from "../../utils/jsonSize.ts";
 import { COMBO_FAILURE_THRESHOLD, recordComboFailure } from "./failureTracker.ts";
@@ -60,6 +56,7 @@ import {
 } from "./comboPredicates.ts";
 import { collectCircuitOpenExclusions, evaluateExecuteTargetGates } from "./executeTargetGates.ts";
 import { executeTargetAttempt } from "./executeTargetAttempt.ts";
+import { localQuotaUnavailableResponse } from "./localCircuitRefusal.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
 
@@ -694,7 +691,13 @@ export async function dispatchWithCooldownRetry(opts: {
         const retryHuman = formatRetryAfter(toRetryAfterDisplayValue(state.earliestRetryAfter));
         deps.log.warn("COMBO", `All models failed | ${msg} (${retryHuman})`);
         return withQuotaExhaustionClassification(
-          unavailableResponse(status, msg, state.earliestRetryAfter, retryHuman),
+          localQuotaUnavailableResponse(
+            status,
+            msg,
+            state.earliestRetryAfter,
+            retryHuman,
+            state.comboErrors
+          ),
           state.observedFailure ? state.allObservedFailuresQuota : null
         );
       }

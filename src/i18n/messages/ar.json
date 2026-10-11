@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "حدود الطلبات اليومية",
+    "geminiDailyQuotaDescription": "تُطبَّق الحدود على كل نموذج بصورة مستقلة. يشمل العدد محاولات الاتصال بالمزوّد عبر OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "تجاوز حدود RPM / TPM المحلية",
+    "geminiDailyQuotaMinuteLimitsDescription": "تبقى الحدود اليومية وضوابط التزامن مفعّلة؛ وتظل حدود المزوّد سارية.",
+    "geminiDailyQuotaReset": "إعادة الضبط عند {time} PT",
+    "geminiDailyQuotaUsage": "استُخدم {used}/{limit} · المتبقي {remaining}",
+    "geminiDailyQuotaEmpty": "تظهر أعداد النماذج بعد الطلب الأول.",
+    "geminiDailyQuotaBulk": "تطبيق الحدود اليومية على جميع اتصالات Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "تم تحديث {count} اتصال؛ فشل {failed}."
   },
   "settings": {
     "title": "الإعدادات",

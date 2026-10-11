@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateGeminiDailyQuota } from "./geminiDailyQuota";
 import {
   OPENROUTER_PRESET_MAX_LENGTH,
   isOpenRouterPresetValue,
@@ -159,6 +160,7 @@ export function validateProviderSpecificData(
   ctx: z.RefinementCtx
 ): void {
   if (!data) return;
+  validateGeminiDailyQuota(data.geminiDailyQuota, ctx);
 
   const gheUrl = data.gheUrl;
   if (gheUrl !== undefined) {

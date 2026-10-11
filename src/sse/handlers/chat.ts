@@ -26,6 +26,10 @@ import {
   recordModelLockoutFailure,
   isDailyQuotaExhausted,
 } from "@omniroute/open-sse/services/accountFallback.ts";
+import {
+  clearGeminiDailyQuotaAffinity,
+  isGeminiDailyQuotaResponse,
+} from "@omniroute/open-sse/services/geminiDailyQuota.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
@@ -1788,6 +1792,7 @@ async function handleSingleModelChat(
     let lastError = requestRetryLastError;
     let lastStatus = requestRetryLastStatus;
     let lastCooldownMs = requestRetryLastCooldownMs;
+    let lastDailyQuotaResponse: Response | null = null;
     let preselectedCredentials = initialPreselectedCredentials;
     initialPreselectedCredentials = null;
 
@@ -1933,7 +1938,7 @@ async function handleSingleModelChat(
         // operator's node was shadowed by the reserved-prefix guard, not broken.
         const shadowedNode =
           excludedConnectionIds.size === 0 ? await findShadowedCompatibleNode(provider) : null;
-        const noCredsRes = handleNoCredentials(
+        let noCredsRes = handleNoCredentials(
           credentials,
           excludedConnectionIds.size > 0 ? Array.from(excludedConnectionIds)[0] : null,
           provider,
@@ -1945,6 +1950,7 @@ async function handleSingleModelChat(
           shadowedNode,
           runtimeOptions?.correlationId ?? null
         );
+        if (!credentials && lastDailyQuotaResponse) noCredsRes = lastDailyQuotaResponse;
         // #14360: log the synthesized quota-parking refusal (never for combo targets).
         const skip = { credentials, lastError, lastStatus, provider, model };
         await recordQuotaParkedSkip(skip, rejectionScope);
@@ -2432,16 +2438,23 @@ async function handleSingleModelChat(
         return withSelectedConnectionHeader(result.response, credentials?.connectionId);
       }
 
-      if (result.errorType === "account_semaphore_capacity") {
+      const isDailyQuota = isGeminiDailyQuotaResponse(result.response);
+      lastDailyQuotaResponse = isDailyQuota ? result.response : null;
+      if (isDailyQuota || result.errorType === "account_semaphore_capacity") {
         // Local concurrency pressure is not an upstream quota failure. Prefer another
         // account when possible; pinned combo steps fall through to combo orchestration.
-        if (hasForcedConnection) {
+        if (hasForcedConnection || (isDailyQuota && runtimeOptions.managedLease)) {
           return withSelectedConnectionHeader(result.response, credentials?.connectionId);
         }
-
+        if (isDailyQuota)
+          clearGeminiDailyQuotaAffinity(
+            runtimeOptions.sessionAffinityKey,
+            provider,
+            credentials.connectionId
+          );
         log.warn(
           "AUTH",
-          `Account ${accountId}... at local concurrency cap, trying fallback account`
+          `Account ${accountId}... at local ${isDailyQuota ? "daily quota" : "concurrency cap"}, trying fallback account`
         );
         excludedConnectionIds.add(credentials.connectionId);
         lastError = result.error;

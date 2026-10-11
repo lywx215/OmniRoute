@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Päivittäiset pyyntörajat",
+    "geminiDailyQuotaDescription": "Rajat koskevat kutakin mallia erikseen. Laskureihin sisältyvät palveluntarjoajalle OmniRouten kautta tehdyt pyyntöyritykset.",
+    "geminiDailyQuotaMinuteLimits": "Ohita paikalliset RPM / TPM -rajat",
+    "geminiDailyQuotaMinuteLimitsDescription": "Päivittäiset rajat ja samanaikaisuuden hallinta pysyvät käytössä; palveluntarjoajan rajat ovat edelleen voimassa.",
+    "geminiDailyQuotaReset": "Nollautuu klo {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} käytetty · {remaining} jäljellä",
+    "geminiDailyQuotaEmpty": "Mallikohtaiset laskurit näkyvät ensimmäisen pyynnön jälkeen.",
+    "geminiDailyQuotaBulk": "Käytä päivittäisiä rajoja kaikissa Gemini-yhteyksissä ({count})",
+    "geminiDailyQuotaBulkResult": "{count} yhteyttä päivitetty; {failed} epäonnistui."
   },
   "settings": {
     "title": "Asetukset",

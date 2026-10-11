@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "Iyakokin buƙatu na kullum",
+    "geminiDailyQuotaDescription": "Iyakoki suna aiki dabam ga kowane samfurin. Ƙididdiga ta haɗa da ƙoƙarin aika buƙatu zuwa mai ba da sabis ta OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Tsallake iyakokin RPM / TPM na cikin gida",
+    "geminiDailyQuotaMinuteLimitsDescription": "Iyakokin kullum da sarrafa buƙatun lokaci guda suna ci gaba da aiki; iyakokin mai ba da sabis ma suna aiki.",
+    "geminiDailyQuotaReset": "Ana sake saita a {time} PT",
+    "geminiDailyQuotaUsage": "An yi amfani da {used}/{limit} · {remaining} ya rage",
+    "geminiDailyQuotaEmpty": "Ƙididdigar samfurin tana bayyana bayan buƙata ta farko.",
+    "geminiDailyQuotaBulk": "Aiwatar da iyakokin kullum ga duk haɗin Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "An sabunta haɗi {count}; {failed} sun kasa."
   },
   "settings": {
     "title": "Saituna",

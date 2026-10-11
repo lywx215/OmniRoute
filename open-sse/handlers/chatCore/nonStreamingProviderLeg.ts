@@ -23,6 +23,7 @@ import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
+import { getTrustedGeminiDailyQuotaError } from "../../services/geminiDailyQuota.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { unwrapClinepassEnvelope } from "../../utils/clinepassEnvelope.ts";
 import { unwrapClineNonStreamingEnvelope } from "./clineResponseEnvelope.ts";
@@ -476,6 +477,7 @@ export async function runNonStreamingProviderLeg(
       );
     }
   } catch (error) {
+    if (getTrustedGeminiDailyQuotaError(error)) throw error;
     if (
       !!error &&
       typeof error === "object" &&

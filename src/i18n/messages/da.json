@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Daglige anmodningsgrænser",
+    "geminiDailyQuotaDescription": "Grænserne gælder separat for hver model. Optællingen omfatter forsøg på anmodninger til udbyderen via OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Spring lokale RPM / TPM-grænser over",
+    "geminiDailyQuotaMinuteLimitsDescription": "Daglige grænser og samtidighedskontrol forbliver aktive; udbyderens grænser gælder stadig.",
+    "geminiDailyQuotaReset": "Nulstilles {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} brugt · {remaining} tilbage",
+    "geminiDailyQuotaEmpty": "Modeltællere vises efter den første anmodning.",
+    "geminiDailyQuotaBulk": "Anvend daglige grænser på alle Gemini-forbindelser ({count})",
+    "geminiDailyQuotaBulkResult": "{count} forbindelser opdateret; {failed} mislykkedes."
   },
   "settings": {
     "title": "Indstillinger",

@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Ημερήσια όρια αιτημάτων",
+    "geminiDailyQuotaDescription": "Τα όρια ισχύουν ανεξάρτητα για κάθε μοντέλο. Η καταμέτρηση περιλαμβάνει τις προσπάθειες αιτημάτων προς τον πάροχο μέσω OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Παράκαμψη τοπικών ορίων RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Τα ημερήσια όρια και οι έλεγχοι ταυτόχρονων αιτημάτων παραμένουν ενεργά· τα όρια του παρόχου εξακολουθούν να ισχύουν.",
+    "geminiDailyQuotaReset": "Επαναφορά στις {time} PT",
+    "geminiDailyQuotaUsage": "Χρησιμοποιήθηκαν {used}/{limit} · απομένουν {remaining}",
+    "geminiDailyQuotaEmpty": "Οι μετρητές μοντέλων εμφανίζονται μετά το πρώτο αίτημα.",
+    "geminiDailyQuotaBulk": "Εφαρμογή ημερήσιων ορίων σε όλες τις συνδέσεις Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Ενημερώθηκαν {count} συνδέσεις· απέτυχαν {failed}."
   },
   "settings": {
     "title": "Ρυθμίσεις",

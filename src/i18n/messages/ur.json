@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "روزانہ درخواستوں کی حدود",
+    "geminiDailyQuotaDescription": "حدود ہر ماڈل پر الگ الگ لاگو ہوتی ہیں۔ گنتی میں OmniRoute کے ذریعے فراہم کنندہ کو درخواست بھیجنے کی کوششیں شامل ہیں۔",
+    "geminiDailyQuotaMinuteLimits": "مقامی RPM / TPM حدود چھوڑیں",
+    "geminiDailyQuotaMinuteLimitsDescription": "روزانہ حدود اور بیک وقت درخواستوں کے کنٹرول فعال رہتے ہیں؛ فراہم کنندہ کی حدود بھی لاگو رہتی ہیں۔",
+    "geminiDailyQuotaReset": "{time} PT پر دوبارہ شروع ہوگا",
+    "geminiDailyQuotaUsage": "{used}/{limit} استعمال ہوئے · {remaining} باقی",
+    "geminiDailyQuotaEmpty": "پہلی درخواست کے بعد ماڈل کی گنتی ظاہر ہوگی۔",
+    "geminiDailyQuotaBulk": "تمام Gemini کنکشنز پر روزانہ حدود لاگو کریں ({count})",
+    "geminiDailyQuotaBulkResult": "{count} کنکشنز اپ ڈیٹ ہوئے؛ {failed} ناکام ہوئے۔"
   },
   "settings": {
     "title": "ترتیبات",

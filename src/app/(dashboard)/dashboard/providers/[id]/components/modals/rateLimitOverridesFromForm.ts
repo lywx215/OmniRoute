@@ -18,6 +18,20 @@ export interface RateLimitOverridesFormFields {
 
 const NUMERIC_FIELDS = ["rpm", "rpd", "tpm", "tpd", "minTime", "maxWaitMs"] as const;
 
+/** Restores blank fields for inherited limits and explicit values for connection overrides. */
+export function getRateLimitOverridesFormValues(
+  overrides?: ConnectionRateLimitOverrides | null
+): RateLimitOverridesFormFields {
+  const numeric = Object.fromEntries(
+    NUMERIC_FIELDS.map((key) => [key, overrides?.[key] != null ? String(overrides[key]) : ""])
+  ) as Pick<RateLimitOverridesFormFields, (typeof NUMERIC_FIELDS)[number]>;
+  return {
+    ...numeric,
+    rateLimitMaxConcurrent: overrides?.maxConcurrent != null ? String(overrides.maxConcurrent) : "",
+    modelConcurrency: modelConcurrencyFormValue(overrides),
+  };
+}
+
 /**
  * Builds the `rateLimitOverrides` payload from the edit form. Per-model caps
  * (`model=cap`, one per line): blank = no caps; a malformed entry is returned

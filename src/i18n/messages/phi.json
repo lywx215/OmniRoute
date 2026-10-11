@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Mga arawang limitasyon ng kahilingan",
+    "geminiDailyQuotaDescription": "Hiwalay na inilalapat ang mga limitasyon sa bawat modelo. Kabilang sa bilang ang mga pagtatangkang humiling sa provider sa pamamagitan ng OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Laktawan ang lokal na mga limitasyon ng RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Nananatiling aktibo ang arawang limitasyon at kontrol sa sabayang kahilingan; umiiral pa rin ang mga limitasyon ng provider.",
+    "geminiDailyQuotaReset": "Nire-reset sa {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} nagamit · {remaining} natitira",
+    "geminiDailyQuotaEmpty": "Lalabas ang bilang ng bawat modelo pagkatapos ng unang kahilingan.",
+    "geminiDailyQuotaBulk": "Ilapat ang arawang limitasyon sa lahat ng koneksiyong Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Na-update ang {count} koneksiyon; {failed} ang nabigo."
   },
   "settings": {
     "title": "Mga setting",

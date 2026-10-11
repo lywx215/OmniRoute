@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Limiti ta’ talbiet kuljum",
+    "geminiDailyQuotaDescription": "Il-limiti japplikaw separatament għal kull mudell. L-għadd jinkludi tentattivi ta’ talbiet lill-fornitur permezz ta’ OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Aqbeż il-limiti lokali RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Il-limiti ta’ kuljum u l-kontrolli tal-konkorrenza jibqgħu attivi; il-limiti tal-fornitur xorta japplikaw.",
+    "geminiDailyQuotaReset": "Jerġa’ jibda f’{time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} użati · {remaining} fadal",
+    "geminiDailyQuotaEmpty": "L-għadd tal-mudelli jidher wara l-ewwel talba.",
+    "geminiDailyQuotaBulk": "Applika limiti ta’ kuljum għall-konnessjonijiet Gemini kollha ({count})",
+    "geminiDailyQuotaBulkResult": "Ġew aġġornati {count} konnessjonijiet; {failed} fallew."
   },
   "settings": {
     "title": "Issettjar",

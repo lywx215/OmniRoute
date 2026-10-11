@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "தினசரி கோரிக்கை வரம்புகள்",
+    "geminiDailyQuotaDescription": "ஒவ்வொரு மாதிரிக்கும் வரம்புகள் தனித்தனியாகப் பொருந்தும். எண்ணிக்கையில் OmniRoute வழியாக வழங்குநருக்கு அனுப்ப முயன்ற கோரிக்கைகளும் அடங்கும்.",
+    "geminiDailyQuotaMinuteLimits": "உள்ளூர் RPM / TPM வரம்புகளைத் தவிர்",
+    "geminiDailyQuotaMinuteLimitsDescription": "தினசரி வரம்புகளும் ஒரே நேரக் கோரிக்கை கட்டுப்பாடுகளும் செயலில் இருக்கும்; வழங்குநரின் வரம்புகளும் பொருந்தும்.",
+    "geminiDailyQuotaReset": "{time} PT இல் மீட்டமைக்கப்படும்",
+    "geminiDailyQuotaUsage": "{used}/{limit} பயன்படுத்தப்பட்டது · {remaining} மீதமுள்ளது",
+    "geminiDailyQuotaEmpty": "முதல் கோரிக்கைக்குப் பிறகு மாதிரியின் எண்ணிக்கை தோன்றும்.",
+    "geminiDailyQuotaBulk": "அனைத்து Gemini இணைப்புகளுக்கும் தினசரி வரம்புகளைப் பயன்படுத்து ({count})",
+    "geminiDailyQuotaBulkResult": "{count} இணைப்புகள் புதுப்பிக்கப்பட்டன; {failed} தோல்வியடைந்தன."
   },
   "settings": {
     "title": "அமைப்புகள்",

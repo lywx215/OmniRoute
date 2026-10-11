@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "កម្រិតសំណើប្រចាំថ្ងៃ",
+    "geminiDailyQuotaDescription": "កម្រិតត្រូវបានអនុវត្តដោយឡែកសម្រាប់ម៉ូដែលនីមួយៗ។ ចំនួនរាប់រួមបញ្ចូលការព្យាយាមផ្ញើសំណើទៅអ្នកផ្តល់សេវាតាម OmniRoute។",
+    "geminiDailyQuotaMinuteLimits": "រំលងកម្រិត RPM / TPM ក្នុងមូលដ្ឋាន",
+    "geminiDailyQuotaMinuteLimitsDescription": "កម្រិតប្រចាំថ្ងៃ និងការគ្រប់គ្រងសំណើក្នុងពេលតែមួយនៅតែសកម្ម ហើយកម្រិតរបស់អ្នកផ្តល់សេវានៅតែអនុវត្ត។",
+    "geminiDailyQuotaReset": "កំណត់ឡើងវិញនៅ {time} PT",
+    "geminiDailyQuotaUsage": "បានប្រើ {used}/{limit} · នៅសល់ {remaining}",
+    "geminiDailyQuotaEmpty": "ចំនួនរាប់ម៉ូដែលបង្ហាញបន្ទាប់ពីសំណើដំបូង។",
+    "geminiDailyQuotaBulk": "អនុវត្តកម្រិតប្រចាំថ្ងៃលើការតភ្ជាប់ Gemini ទាំងអស់ ({count})",
+    "geminiDailyQuotaBulkResult": "បានធ្វើបច្ចុប្បន្នភាពការតភ្ជាប់ {count} ហើយ {failed} បានបរាជ័យ។"
   },
   "settings": {
     "title": "ការកំណត់",

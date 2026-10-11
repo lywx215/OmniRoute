@@ -7,6 +7,7 @@ import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import { checkCredentialGate } from "../credentialGate.ts";
 import { canAffordRequest } from "../../../src/lib/quota/quotaScheduler.ts";
+import { bypassTargetMinuteQuota } from "./targetTokenLimit.ts";
 import { resolveQuotaExhaustionCutoffForTarget } from "./quotaExhaustionCutoff.ts";
 import type { ResetWindowConfig } from "./quotaScoring.ts";
 import { parseModel } from "../model.ts";
@@ -424,6 +425,7 @@ export async function isPinnedTargetModelScopedUnusable(args: {
     process.env.OMNIROUTE_QUOTA_AWARE_ROUTING === "1" &&
     provider &&
     connectionId &&
+    !(await bypassTargetMinuteQuota(connectionId)) &&
     !canAffordRequest(connectionId, target.modelStr, body).affordable
   ) {
     return true;

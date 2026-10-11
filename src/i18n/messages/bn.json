@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "দৈনিক অনুরোধের সীমা",
+    "geminiDailyQuotaDescription": "প্রতিটি মডেলে আলাদাভাবে সীমা প্রযোজ্য। গণনায় OmniRoute-এর মাধ্যমে সরবরাহকারীকে পাঠানোর প্রতিটি প্রচেষ্টা অন্তর্ভুক্ত থাকে।",
+    "geminiDailyQuotaMinuteLimits": "স্থানীয় RPM / TPM সীমা এড়িয়ে যান",
+    "geminiDailyQuotaMinuteLimitsDescription": "দৈনিক সীমা ও সমসাময়িক অনুরোধের নিয়ন্ত্রণ চালু থাকে; সরবরাহকারীর সীমাও প্রযোজ্য থাকে।",
+    "geminiDailyQuotaReset": "{time} PT-তে পুনরায় শুরু হবে",
+    "geminiDailyQuotaUsage": "{used}/{limit} ব্যবহৃত · {remaining} অবশিষ্ট",
+    "geminiDailyQuotaEmpty": "প্রথম অনুরোধের পরে মডেলের গণনা দেখা যাবে।",
+    "geminiDailyQuotaBulk": "সব Gemini সংযোগে দৈনিক সীমা প্রয়োগ করুন ({count})",
+    "geminiDailyQuotaBulkResult": "{count}টি সংযোগ হালনাগাদ হয়েছে; {failed}টি ব্যর্থ হয়েছে।"
   },
   "settings": {
     "title": "সেটিংস",

@@ -29,6 +29,8 @@ import {
   supportsProviderQuota,
 } from "@/shared/utils/providerQuotaVisibility";
 import ProviderQuotaVisibilityToggle from "./ProviderQuotaVisibilityToggle";
+import type { GeminiDailyQuotaProjection } from "@/lib/db/geminiDailyQuota";
+import GeminiDailyQuotaDisplay from "./GeminiDailyQuotaDisplay";
 
 // ---------------------------------------------------------------------------
 // Types (exported so the client can reference them without re-importing)
@@ -60,6 +62,7 @@ export interface ConnectionRowConnection {
   perKeyProxyEnabled?: boolean;
   quotaVisible?: boolean;
   codexAccountPool?: CodexAccountPoolProjection;
+  geminiDailyQuotaStatus?: GeminiDailyQuotaProjection;
 }
 
 export interface ConnectionRowProps {
@@ -906,6 +909,7 @@ export default function ConnectionRow({
                 );
               })()}
           </div>
+          <GeminiDailyQuotaDisplay status={connection.geminiDailyQuotaStatus} />
         </div>
       </div>
       <div className="flex items-center gap-2">

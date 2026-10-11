@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "दैनिक अनुरोध सीमाहरू",
+    "geminiDailyQuotaDescription": "सीमाहरू प्रत्येक मोडेलमा छुट्टाछुट्टै लागू हुन्छन्। गणनामा OmniRoute मार्फत प्रदायकलाई अनुरोध पठाउने प्रयासहरू समावेश हुन्छन्।",
+    "geminiDailyQuotaMinuteLimits": "स्थानीय RPM / TPM सीमाहरू छोड्नुहोस्",
+    "geminiDailyQuotaMinuteLimitsDescription": "दैनिक सीमा र एकैसाथ हुने अनुरोधहरूको नियन्त्रण सक्रिय रहन्छ; प्रदायकका सीमाहरू पनि लागू हुन्छन्।",
+    "geminiDailyQuotaReset": "{time} PT मा पुनः सुरु हुन्छ",
+    "geminiDailyQuotaUsage": "{used}/{limit} प्रयोग भयो · {remaining} बाँकी",
+    "geminiDailyQuotaEmpty": "पहिलो अनुरोधपछि मोडेलको गणना देखिन्छ।",
+    "geminiDailyQuotaBulk": "सबै Gemini जडानहरूमा दैनिक सीमा लागू गर्नुहोस् ({count})",
+    "geminiDailyQuotaBulkResult": "{count} जडान अद्यावधिक भए; {failed} असफल भए।"
   },
   "settings": {
     "title": "सेटिङहरू",

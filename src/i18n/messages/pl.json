@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Dzienne limity żądań",
+    "geminiDailyQuotaDescription": "Limity obowiązują osobno dla każdego modelu. Liczniki obejmują próby żądań do dostawcy przez OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Pomiń lokalne limity RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Dzienne limity i kontrola współbieżności pozostają aktywne; limity dostawcy nadal obowiązują.",
+    "geminiDailyQuotaReset": "Reset o {time} PT",
+    "geminiDailyQuotaUsage": "Wykorzystano {used}/{limit} · pozostało {remaining}",
+    "geminiDailyQuotaEmpty": "Liczniki modeli pojawiają się po pierwszym żądaniu.",
+    "geminiDailyQuotaBulk": "Zastosuj dzienne limity do wszystkich połączeń Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Zaktualizowano {count} połączeń; niepowodzenia: {failed}."
   },
   "settings": {
     "title": "Ustawienia",

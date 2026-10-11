@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Đã tắt tín dụng trả phí của Codex",
     "failedUpdateCodexPaidCredits": "Không thể cập nhật chính sách tín dụng trả phí của Codex",
     "allowCodexPaidCreditsLabel": "Cho phép tín dụng trả phí của Codex",
-    "allowCodexPaidCreditsDescription": "Cho phép tài khoản này sử dụng tín dụng trả phí sau khi hạn mức gói đăng ký đạt đến ngưỡng cắt. Yêu cầu có tín dụng khả dụng do OpenAI báo cáo; có thể phát sinh phí. Giới hạn Spark và thời gian chờ (cooldown) từ upstream vẫn được áp dụng. Tính khả dụng của tín dụng được kiểm tra ngay cả khi tính năng preflight hạn mức bị tắt."
+    "allowCodexPaidCreditsDescription": "Cho phép tài khoản này sử dụng tín dụng trả phí sau khi hạn mức gói đăng ký đạt đến ngưỡng cắt. Yêu cầu có tín dụng khả dụng do OpenAI báo cáo; có thể phát sinh phí. Giới hạn Spark và thời gian chờ (cooldown) từ upstream vẫn được áp dụng. Tính khả dụng của tín dụng được kiểm tra ngay cả khi tính năng preflight hạn mức bị tắt.",
+    "geminiDailyQuotaTitle": "Giới hạn yêu cầu hằng ngày",
+    "geminiDailyQuotaDescription": "Giới hạn áp dụng riêng cho từng mô hình. Số đếm bao gồm các lần thử gửi yêu cầu đến nhà cung cấp qua OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Bỏ qua giới hạn RPM / TPM cục bộ",
+    "geminiDailyQuotaMinuteLimitsDescription": "Giới hạn hằng ngày và kiểm soát đồng thời vẫn hoạt động; giới hạn của nhà cung cấp vẫn áp dụng.",
+    "geminiDailyQuotaReset": "Đặt lại lúc {time} PT",
+    "geminiDailyQuotaUsage": "Đã dùng {used}/{limit} · còn lại {remaining}",
+    "geminiDailyQuotaEmpty": "Số đếm theo mô hình xuất hiện sau yêu cầu đầu tiên.",
+    "geminiDailyQuotaBulk": "Áp dụng giới hạn hằng ngày cho mọi kết nối Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Đã cập nhật {count} kết nối; {failed} thất bại."
   },
   "settings": {
     "title": "Cài đặt",

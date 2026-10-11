@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "പ്രതിദിന അഭ്യർത്ഥനാ പരിധികൾ",
+    "geminiDailyQuotaDescription": "ഓരോ മോഡലിനും പരിധികൾ പ്രത്യേകം ബാധകമാണ്. OmniRoute വഴി ദാതാവിലേക്ക് അഭ്യർത്ഥന അയയ്ക്കാനുള്ള ശ്രമങ്ങളും എണ്ണത്തിൽ ഉൾപ്പെടുന്നു.",
+    "geminiDailyQuotaMinuteLimits": "പ്രാദേശിക RPM / TPM പരിധികൾ ഒഴിവാക്കുക",
+    "geminiDailyQuotaMinuteLimitsDescription": "പ്രതിദിന പരിധികളും ഒരേസമയം നടക്കുന്ന അഭ്യർത്ഥനകളുടെ നിയന്ത്രണവും സജീവമായി തുടരും; ദാതാവിന്റെ പരിധികളും ബാധകമാണ്.",
+    "geminiDailyQuotaReset": "{time} PT-യിൽ പുനഃസജ്ജമാക്കും",
+    "geminiDailyQuotaUsage": "{used}/{limit} ഉപയോഗിച്ചു · {remaining} ശേഷിക്കുന്നു",
+    "geminiDailyQuotaEmpty": "ആദ്യ അഭ്യർത്ഥനയ്ക്കു ശേഷം മോഡലിന്റെ എണ്ണം കാണിക്കും.",
+    "geminiDailyQuotaBulk": "എല്ലാ Gemini കണക്ഷനുകൾക്കും പ്രതിദിന പരിധികൾ പ്രയോഗിക്കുക ({count})",
+    "geminiDailyQuotaBulkResult": "{count} കണക്ഷനുകൾ പുതുക്കി; {failed} പരാജയപ്പെട്ടു."
   },
   "settings": {
     "title": "ക്രമീകരണങ്ങൾ",

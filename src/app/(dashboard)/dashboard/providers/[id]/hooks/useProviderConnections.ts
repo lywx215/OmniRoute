@@ -34,6 +34,8 @@ import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers"
 import { useProviderQuotaVisibility } from "./useProviderQuotaVisibility";
 import { useReorderByAvailability } from "./useReorderByAvailability";
 import { useCodexPaidCreditsToggle } from "./useCodexPaidCreditsToggle";
+import { useGeminiDailyQuotaPolling } from "./useGeminiDailyQuotaPolling";
+import { getProxyConnectionRefreshKey } from "./providerConnectionRefreshKey";
 import {
   useConnectionDeleteConfirm,
   type ConnectionDeleteConfirmState,
@@ -354,6 +356,7 @@ export function useProviderConnections(
     }
     setLoading(false);
   }, [providerId, isCompatible]);
+  useGeminiDailyQuotaPolling(providerId, connections, setConnections);
 
   // ── effects ──────────────────────────────────────────────────────────────
   // The async work is defined INSIDE each effect (a component-scope loader
@@ -377,15 +380,16 @@ export function useProviderConnections(
     void runProxyConfig();
   }, [providerId, isCompatible]);
 
+  const proxyConnectionKey = getProxyConnectionRefreshKey(connections);
   // Per-connection proxy (handles registry assignments)
   useEffect(() => {
-    if (loading || connections.length === 0) return;
+    if (loading || !proxyConnectionKey) return;
     const run = async () => {
-      const map = await resolveConnectionProxies(connections);
+      const map = await resolveConnectionProxies(connectionsRef.current);
       if (map) setConnProxyMap(map);
     };
     void run();
-  }, [loading, connections]);
+  }, [loading, proxyConnectionKey]);
 
   // Upstream proxy routing config (native / CLIProxyAPI / Dario / fallback)
   useEffect(() => {

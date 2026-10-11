@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "दैनंदिन विनंती मर्यादा",
+    "geminiDailyQuotaDescription": "प्रत्येक मॉडेलला मर्यादा स्वतंत्रपणे लागू होतात. मोजणीत OmniRoute द्वारे प्रदात्याकडे विनंती पाठवण्याचे प्रयत्न समाविष्ट आहेत.",
+    "geminiDailyQuotaMinuteLimits": "स्थानिक RPM / TPM मर्यादा वगळा",
+    "geminiDailyQuotaMinuteLimitsDescription": "दैनंदिन मर्यादा आणि एकाच वेळी होणाऱ्या विनंत्यांचे नियंत्रण सक्रिय राहते; प्रदात्याच्या मर्यादाही लागू राहतात.",
+    "geminiDailyQuotaReset": "{time} PT ला रीसेट होईल",
+    "geminiDailyQuotaUsage": "{used}/{limit} वापरले · {remaining} शिल्लक",
+    "geminiDailyQuotaEmpty": "पहिल्या विनंतीनंतर मॉडेलची मोजणी दिसेल.",
+    "geminiDailyQuotaBulk": "सर्व Gemini जोडण्यांना दैनंदिन मर्यादा लागू करा ({count})",
+    "geminiDailyQuotaBulkResult": "{count} जोडण्या अद्ययावत केल्या; {failed} अयशस्वी झाल्या."
   },
   "settings": {
     "title": "सेटिंग्ज",

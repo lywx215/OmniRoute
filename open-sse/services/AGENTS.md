@@ -18,6 +18,7 @@ Live count: `ls open-sse/services/*.ts | wc -l` (currently 134). More including 
 
 - **`rateLimitManager.ts`** — Token bucket per API key + provider combo. Rejects before dispatch.
 - **`usage.ts`** — Per-request token/cost consumption tracking.
+- **`geminiDailyQuota.ts`** — Opt-in per-connection/model daily request reservations and routing errors; persistent counts reset at Pacific midnight.
 - **`quotaCache.ts`** — In-memory quota snapshots, pre-loaded at startup.
 
 ### Account & Token Management

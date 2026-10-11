@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Napi kéréskorlátok",
+    "geminiDailyQuotaDescription": "A korlátok minden modellre külön érvényesek. A számlálók az OmniRoute-on keresztüli szolgáltatói kéréskísérleteket is tartalmazzák.",
+    "geminiDailyQuotaMinuteLimits": "Helyi RPM / TPM korlátok kihagyása",
+    "geminiDailyQuotaMinuteLimitsDescription": "A napi korlátok és a párhuzamosság szabályozása aktív marad; a szolgáltató korlátai továbbra is érvényesek.",
+    "geminiDailyQuotaReset": "Visszaállítás: {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} felhasználva · {remaining} maradt",
+    "geminiDailyQuotaEmpty": "A modellszámlálók az első kérés után jelennek meg.",
+    "geminiDailyQuotaBulk": "Napi korlátok alkalmazása minden Gemini-kapcsolatra ({count})",
+    "geminiDailyQuotaBulkResult": "{count} kapcsolat frissítve; {failed} sikertelen."
   },
   "settings": {
     "title": "Beállítások elemre",

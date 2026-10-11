@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "Հարցումների օրական սահմանաչափեր",
+    "geminiDailyQuotaDescription": "Սահմանաչափերը կիրառվում են յուրաքանչյուր մոդելի համար առանձին։ Հաշվարկը ներառում է OmniRoute-ի միջոցով մատակարարին ուղարկվող հարցումների փորձերը։",
+    "geminiDailyQuotaMinuteLimits": "Բաց թողնել տեղական RPM / TPM սահմանաչափերը",
+    "geminiDailyQuotaMinuteLimitsDescription": "Օրական սահմանաչափերն ու զուգահեռ հարցումների վերահսկումը մնում են ակտիվ․ մատակարարի սահմանաչափերը նույնպես գործում են։",
+    "geminiDailyQuotaReset": "Զրոյացվում է {time} PT-ին",
+    "geminiDailyQuotaUsage": "Օգտագործվել է {used}/{limit} · մնացել է {remaining}",
+    "geminiDailyQuotaEmpty": "Մոդելների հաշվիչները հայտնվում են առաջին հարցումից հետո։",
+    "geminiDailyQuotaBulk": "Կիրառել օրական սահմանաչափերը բոլոր Gemini կապերի համար ({count})",
+    "geminiDailyQuotaBulkResult": "Թարմացվել է {count} կապ․ {failed}-ը ձախողվել է։"
   },
   "settings": {
     "title": "Կարգավորումներ",

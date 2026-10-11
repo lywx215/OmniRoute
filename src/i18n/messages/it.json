@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Crediti a pagamento Codex disattivati",
     "failedUpdateCodexPaidCredits": "Impossibile aggiornare la policy dei crediti a pagamento Codex",
     "allowCodexPaidCreditsLabel": "Consenti crediti a pagamento Codex",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Limiti giornalieri delle richieste",
+    "geminiDailyQuotaDescription": "I limiti si applicano separatamente a ogni modello. I conteggi includono i tentativi di richiesta al fornitore tramite OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Ignora i limiti locali RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "I limiti giornalieri e i controlli di concorrenza restano attivi; i limiti del fornitore continuano ad applicarsi.",
+    "geminiDailyQuotaReset": "Reimpostazione alle {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} utilizzati · {remaining} rimanenti",
+    "geminiDailyQuotaEmpty": "I conteggi per modello compaiono dopo la prima richiesta.",
+    "geminiDailyQuotaBulk": "Applica i limiti giornalieri a tutte le connessioni Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "{count} connessioni aggiornate; {failed} non riuscite."
   },
   "settings": {
     "title": "Impostazioni",

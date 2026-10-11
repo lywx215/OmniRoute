@@ -7,6 +7,7 @@ import { normalizeOpenRouterPreset } from "@/shared/constants/openRouterPreset";
 import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
 import { normalizePeakHourProtection } from "@/lib/providers/peakHourProtection";
 import { normalizeDetectedReasoningControl } from "@/shared/reasoning/reasoningControl";
+import { resolveGeminiDailyQuotaPolicy } from "@/shared/utils/geminiDailyQuota";
 
 export const CODEX_REASONING_EFFORT_VALUES = [
   "none",
@@ -190,6 +191,13 @@ export function normalizeProviderSpecificData(
   const normalized: JsonRecord = { ...record };
 
   normalizeNestedSubObjects(provider, normalized);
+  if ("geminiDailyQuota" in normalized) {
+    if (provider === "gemini" && normalized.geminiDailyQuota !== null) {
+      normalized.geminiDailyQuota = resolveGeminiDailyQuotaPolicy(normalized);
+    } else {
+      delete normalized.geminiDailyQuota;
+    }
+  }
 
   if (
     normalized.reasoningControl !== undefined &&

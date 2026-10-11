@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Limite zilnice de cereri",
+    "geminiDailyQuotaDescription": "Limitele se aplică separat fiecărui model. Numărătoarea include încercările de cereri către furnizor prin OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Omitere limite locale RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Limitele zilnice și controalele de concurență rămân active; limitele furnizorului se aplică în continuare.",
+    "geminiDailyQuotaReset": "Resetare la {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} utilizate · {remaining} rămase",
+    "geminiDailyQuotaEmpty": "Contoarele modelelor apar după prima cerere.",
+    "geminiDailyQuotaBulk": "Aplică limitele zilnice tuturor conexiunilor Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "{count} conexiuni actualizate; {failed} au eșuat."
   },
   "settings": {
     "title": "Setări",

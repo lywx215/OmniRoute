@@ -1,4 +1,5 @@
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
+import { getGeminiDailyQuotaProjection } from "@/lib/db/geminiDailyQuota";
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
@@ -152,6 +153,14 @@ export async function GET(request: Request) {
         refreshToken: undefined,
         idToken: undefined,
         providerSpecificData,
+        ...(c.provider === "gemini"
+          ? {
+              geminiDailyQuotaStatus: getGeminiDailyQuotaProjection(
+                String(c.id),
+                c.providerSpecificData
+              ),
+            }
+          : {}),
         ...(c.provider === "codex"
           ? {
               codexAccountPool: projectCodexAccountPoolWithRoutingQuota(

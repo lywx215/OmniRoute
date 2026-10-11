@@ -2,7 +2,7 @@
 
 **Purpose**: Domain-driven SQLite persistence. Each module owns a specific table set. Schema migrations are versioned and idempotent. No raw SQL in routes — all ops go through `src/lib/db/` modules.
 
-Live count: `ls src/lib/db/*.ts | wc -l` (currently 131). Migrations: `ls src/lib/db/migrations/*.sql | wc -l` (currently 148).
+Live count: `ls src/lib/db/*.ts | wc -l` (currently 141). Migrations: `ls src/lib/db/migrations/*.sql | wc -l` (currently 203).
 
 ---
 
@@ -10,10 +10,12 @@ Live count: `ls src/lib/db/*.ts | wc -l` (currently 131). Migrations: `ls src/li
 
 - **`core.ts`** — `getDbInstance()` returns singleton `better-sqlite3` with WAL journaling. Exports `rowToCamel()` (snake_case → camelCase), `encryptConnectionFields()` for provider credentials at rest. `SCHEMA_SQL` defines **17 base tables** (verify: `grep -c "CREATE TABLE" src/lib/db/core.ts` minus 1 for `_omniroute_migrations`). Native-load / missing-driver classification lives in `sqliteLoadError.ts` and is re-exported from here.
 - **`migrationRunner.ts`** — Applies versioned SQL files from `db/migrations/` inside transactions. Tracks applied migrations in `_omniroute_migrations`. Each migration is idempotent.
-- **`db/migrations/`** — 148 SQL files (`001_initial_schema.sql` → `153_radar_local_model_state.sql`; numbering has intentional gaps). Each runs in a transaction, never fails partially.
+- **`db/migrations/`** — 203 SQL files (`001_initial_schema.sql` → `206_gemini_daily_quota.sql`; numbering has intentional gaps). Each runs in a transaction, never fails partially.
 - The old `localDb.ts` barrel has been removed — consumers must import from the owning named module below.
 
 ## Key Domain Modules
+
+- **`geminiDailyQuota.ts`** — Owns `gemini_daily_request_counts`: capped atomic per-connection/model daily request reservations and usage projections.
 
 | Module                 | Tables / Scope            | Responsibility                                      |
 | ---------------------- | ------------------------- | --------------------------------------------------- |

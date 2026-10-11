@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Vikomo vya maombi vya kila siku",
+    "geminiDailyQuotaDescription": "Vikomo vinatumika kando kwa kila modeli. Hesabu zinajumuisha majaribio ya maombi kwa mtoa huduma kupitia OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Ruka vikomo vya ndani vya RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Vikomo vya kila siku na udhibiti wa maombi ya wakati mmoja vinabaki hai; vikomo vya mtoa huduma bado vinatumika.",
+    "geminiDailyQuotaReset": "Huanzishwa upya saa {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} zimetumika · {remaining} zimebaki",
+    "geminiDailyQuotaEmpty": "Hesabu za modeli huonekana baada ya ombi la kwanza.",
+    "geminiDailyQuotaBulk": "Tumia vikomo vya kila siku kwa miunganisho yote ya Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Miunganisho {count} imesasishwa; {failed} imeshindwa."
   },
   "settings": {
     "title": "Mipangilio",

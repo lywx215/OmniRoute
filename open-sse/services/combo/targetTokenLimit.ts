@@ -7,6 +7,16 @@
  * @internal — not part of the public combo.ts barrel.
  */
 import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.ts";
+import { shouldBypassGeminiMinuteLimits } from "@/shared/utils/geminiDailyQuota";
+
+/** Daily-only Gemini connections skip the optional per-minute combo token ledger. */
+export async function bypassTargetMinuteQuota(connectionId: string): Promise<boolean> {
+  const connection = await getCachedProviderConnectionById(connectionId).catch(() => null);
+  return shouldBypassGeminiMinuteLimits(
+    String(connection?.provider || ""),
+    connection?.providerSpecificData
+  );
+}
 
 /** Undefined = the store keeps its prior limit for this connection. */
 export async function resolveTargetTokenLimit(target: {
@@ -16,6 +26,14 @@ export async function resolveTargetTokenLimit(target: {
   if (!connectionId) return undefined;
   try {
     const connection = await getCachedProviderConnectionById(connectionId);
+    if (
+      shouldBypassGeminiMinuteLimits(
+        String(connection?.provider || ""),
+        connection?.providerSpecificData
+      )
+    ) {
+      return undefined;
+    }
     const overrides = (connection as { rateLimitOverrides?: Record<string, number> | null } | null)
       ?.rateLimitOverrides;
     const tpm = overrides?.tpm;

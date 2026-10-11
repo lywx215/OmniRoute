@@ -39,6 +39,10 @@ import {
 } from "@/lib/providers/peakHourProtection";
 import { buildJinaEnvCredentials } from "@/lib/providers/jina";
 import { buildGeminiEnvCredentials } from "@/lib/providers/gemini";
+import {
+  createGeminiDailyQuotaCredentialRefusal,
+  readGeminiDailyQuotaStatuses,
+} from "@omniroute/open-sse/services/geminiDailyQuota.ts";
 import { toNumber } from "@/shared/utils/numeric";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/designerWebRetirement";
@@ -1450,8 +1454,17 @@ export async function getProviderCredentials(
       connections,
       requestedModel
     );
+    const geminiDailyQuotaStatuses = await readGeminiDailyQuotaStatuses(
+      resolvedId,
+      requestedModel,
+      connections
+    );
     // Filter out unavailable accounts and excluded connection
     let availableConnections = connections.filter((c) => {
+      if (geminiDailyQuotaStatuses.get(c.id)?.exhausted) {
+        connectionFilterStatus.set(c.id, "geminiDailyQuota");
+        return false;
+      }
       if (excludedConnectionIds.has(c.id)) {
         connectionFilterStatus.set(c.id, "excluded");
         return false;
@@ -1575,6 +1588,11 @@ export async function getProviderCredentials(
     });
 
     if (availableConnections.length === 0) {
+      const dailyRefusal = createGeminiDailyQuotaCredentialRefusal(
+        geminiDailyQuotaStatuses,
+        connections
+      );
+      if (dailyRefusal) return dailyRefusal;
       const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
@@ -1584,14 +1602,30 @@ export async function getProviderCredentials(
         const modelLockout = requestedModel
           ? getModelLockoutInfo(provider, connection.id, requestedModel)
           : null;
-        const retryableModelCooldownMs =
-          modelLockout &&
-          modelLockout.remainingMs > 0 &&
-          isRetryableModelLockoutReason(modelLockout.reason)
+        const dailyQuota = geminiDailyQuotaStatuses.get(connection.id);
+        const retryableModelCooldownMs = dailyQuota?.exhausted
+          ? Math.max(
+              Date.parse(dailyQuota.resetAt),
+              connectionCooldownMs ?? 0,
+              codexScopeCooldownMs ?? 0,
+              modelLockout && modelLockout.remainingMs > 0
+                ? Date.now() + modelLockout.remainingMs
+                : 0
+            )
+          : modelLockout &&
+              modelLockout.remainingMs > 0 &&
+              isRetryableModelLockoutReason(modelLockout.reason)
             ? Date.now() + modelLockout.remainingMs
             : null;
 
-        return { connection, connectionCooldownMs, codexScopeCooldownMs, retryableModelCooldownMs };
+        return {
+          connection,
+          // This model cannot recover before its daily reset even when a shorter
+          // connection cooldown expires first.
+          connectionCooldownMs: dailyQuota?.exhausted ? null : connectionCooldownMs,
+          codexScopeCooldownMs,
+          retryableModelCooldownMs,
+        };
       });
 
       const cooldownCandidates = cooldownStates

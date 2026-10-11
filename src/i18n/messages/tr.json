@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Günlük istek sınırları",
+    "geminiDailyQuotaDescription": "Sınırlar her modele ayrı ayrı uygulanır. Sayaçlar OmniRoute üzerinden sağlayıcıya yapılan istek denemelerini içerir.",
+    "geminiDailyQuotaMinuteLimits": "Yerel RPM / TPM sınırlarını atla",
+    "geminiDailyQuotaMinuteLimitsDescription": "Günlük sınırlar ve eşzamanlılık kontrolleri etkin kalır; sağlayıcının sınırları uygulanmaya devam eder.",
+    "geminiDailyQuotaReset": "{time} PT saatinde sıfırlanır",
+    "geminiDailyQuotaUsage": "{used}/{limit} kullanıldı · {remaining} kaldı",
+    "geminiDailyQuotaEmpty": "Model sayaçları ilk istekten sonra görünür.",
+    "geminiDailyQuotaBulk": "Günlük sınırları tüm Gemini bağlantılarına uygula ({count})",
+    "geminiDailyQuotaBulkResult": "{count} bağlantı güncellendi; {failed} başarısız oldu."
   },
   "settings": {
     "title": "Ayarlar",

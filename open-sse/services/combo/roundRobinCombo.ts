@@ -10,10 +10,8 @@ import {
 } from "../accountFallback.ts";
 import {
   errorResponse,
-  unavailableResponse,
   errorResponseWithComboDiagnostics,
   logRetryHintUnreadable,
-  readProseRetryAfter,
 } from "../../utils/error.ts";
 import { buildRecoveryHint } from "./pinRecovery.ts";
 import { buildContextBudgetResponse } from "./budgetExhaustion.ts";
@@ -97,7 +95,6 @@ import {
   isStreamReadinessFailureErrorBody,
   isLocalKeyPolicyBreachErrorBody,
   isLocalQueueCapacityErrorBody,
-  isProviderCircuitOpenResult,
   toRecordedTarget,
   getExhaustedTargetSkipReason,
   requestScopedReplayKey,
@@ -127,7 +124,9 @@ import { releaseStickyPinOnFailure, clearStaleLKGP } from "../combo.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
-import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { isLocalTargetRefusal, recordLocalTargetRefusal } from "./localCircuitRefusal.ts";
+import { localQuotaUnavailableResponse } from "./localCircuitRefusal.ts";
+import { readComboRetryHint } from "./responseRetryAfter.ts";
 
 /**
  * Handle round-robin combo: each request goes to the next model in circular order.
@@ -885,7 +884,6 @@ export async function handleRoundRobinCombo({
                   (typeof parsedError === "string" ? parsedError : null) ||
                   errorBody?.message ||
                   errorText;
-                retryAfter = errorBody?.retryAfter || null;
               }
             } catch {
               logRetryHintUnreadable(log, "COMBO-RR", modelStr, result.status, "unparseable body");
@@ -893,7 +891,7 @@ export async function handleRoundRobinCombo({
           } catch {
             logRetryHintUnreadable(log, "COMBO-RR", modelStr, result.status, "clone failed");
           }
-          retryAfter ||= readProseRetryAfter(bodyText); // #13672 opt-in prose hints
+          retryAfter = readComboRetryHint(result, errorBody, bodyText);
 
           if (result.status === 499) {
             log.info(
@@ -926,9 +924,9 @@ export async function handleRoundRobinCombo({
               errorText = String(errorText);
             }
           }
-          if (isProviderCircuitOpenResult(result, errorText)) {
+          if (isLocalTargetRefusal(result, errorText)) {
             rrEvents.failed(errorText || `HTTP ${result.status}`, Date.now() - startTime);
-            const refusal = recordLocalCircuitRefusal({
+            const refusal = recordLocalTargetRefusal({
               comboName: combo.name,
               modelStr,
               result,
@@ -1277,7 +1275,7 @@ export async function handleRoundRobinCombo({
   if (earliestRetryAfter && isRetryAfterEligibleStatus(status)) {
     const retryHuman = formatRetryAfter(toRetryAfterDisplayValue(earliestRetryAfter));
     log.warn("COMBO-RR", `All models failed | ${msg} (${retryHuman})`);
-    return unavailableResponse(status, msg, earliestRetryAfter, retryHuman);
+    return localQuotaUnavailableResponse(status, msg, earliestRetryAfter, retryHuman, rrOutcomes);
   }
 
   log.warn("COMBO-RR", `All models failed | ${msg}`);

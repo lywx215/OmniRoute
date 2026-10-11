@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "일일 요청 제한",
+    "geminiDailyQuotaDescription": "제한은 모델별로 독립적으로 적용됩니다. 횟수에는 OmniRoute를 통한 업스트림 요청 시도가 포함됩니다.",
+    "geminiDailyQuotaMinuteLimits": "로컬 RPM / TPM 제한 건너뛰기",
+    "geminiDailyQuotaMinuteLimitsDescription": "일일 제한과 동시 실행 제어는 계속 활성화되며 업스트림 제한도 적용됩니다.",
+    "geminiDailyQuotaReset": "{time} PT에 초기화",
+    "geminiDailyQuotaUsage": "{used}/{limit} 사용 · {remaining} 남음",
+    "geminiDailyQuotaEmpty": "모델별 횟수는 첫 요청 이후 표시됩니다.",
+    "geminiDailyQuotaBulk": "모든 Gemini 연결에 일일 제한 적용 ({count})",
+    "geminiDailyQuotaBulkResult": "연결 {count}개 업데이트됨, {failed}개 실패."
   },
   "settings": {
     "title": "설정",

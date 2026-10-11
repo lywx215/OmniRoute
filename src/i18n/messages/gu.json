@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "દૈનિક વિનંતીની મર્યાદાઓ",
+    "geminiDailyQuotaDescription": "દરેક મોડેલ માટે મર્યાદાઓ અલગથી લાગુ પડે છે. ગણતરીમાં OmniRoute દ્વારા પ્રદાતાને કરાયેલા વિનંતીના પ્રયાસો સામેલ છે.",
+    "geminiDailyQuotaMinuteLimits": "સ્થાનિક RPM / TPM મર્યાદાઓ છોડો",
+    "geminiDailyQuotaMinuteLimitsDescription": "દૈનિક મર્યાદાઓ અને સમવર્તી વિનંતીઓના નિયંત્રણો સક્રિય રહે છે; પ્રદાતાની મર્યાદાઓ પણ લાગુ પડે છે.",
+    "geminiDailyQuotaReset": "{time} PT પર ફરી શરૂ થશે",
+    "geminiDailyQuotaUsage": "{used}/{limit} વપરાયા · {remaining} બાકી",
+    "geminiDailyQuotaEmpty": "પ્રથમ વિનંતી પછી મોડેલની ગણતરી દેખાશે.",
+    "geminiDailyQuotaBulk": "બધા Gemini કનેક્શનો પર દૈનિક મર્યાદાઓ લાગુ કરો ({count})",
+    "geminiDailyQuotaBulkResult": "{count} કનેક્શન અપડેટ થયા; {failed} નિષ્ફળ થયા."
   },
   "settings": {
     "title": "સેટિંગ્સ",

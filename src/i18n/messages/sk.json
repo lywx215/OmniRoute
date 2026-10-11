@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Denné limity požiadaviek",
+    "geminiDailyQuotaDescription": "Limity sa uplatňujú samostatne pre každý model. Počty zahŕňajú pokusy o požiadavky na poskytovateľa cez OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Preskočiť miestne limity RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Denné limity a riadenie súbežnosti zostávajú aktívne; limity poskytovateľa naďalej platia.",
+    "geminiDailyQuotaReset": "Obnovenie o {time} PT",
+    "geminiDailyQuotaUsage": "Využité {used}/{limit} · zostáva {remaining}",
+    "geminiDailyQuotaEmpty": "Počítadlá modelov sa zobrazia po prvej požiadavke.",
+    "geminiDailyQuotaBulk": "Použiť denné limity na všetky pripojenia Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Aktualizované pripojenia: {count}; neúspešné: {failed}."
   },
   "settings": {
     "title": "Nastavenia",

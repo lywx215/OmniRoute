@@ -35,6 +35,10 @@ import {
   isFreeVariantModel,
 } from "../services/openrouterFreeWindow.ts";
 import { gateOutboundRequest } from "../services/wafRateLimit.ts";
+import {
+  dispatchWithGeminiDailyQuota,
+  getTrustedGeminiDailyQuotaError,
+} from "../services/geminiDailyQuota.ts";
 import { ClaudeUsageLimitGuard } from "./claudeUsageLimit.ts";
 import { shouldSkipIntraRetryFor429 } from "./rateLimitIntraRetry.ts";
 import type { PoolConfig } from "../services/sessionPool/types.ts";
@@ -977,7 +981,16 @@ export class BaseExecutor {
               this.provider,
               model,
               requestCredentials,
-              (url, init) => dispatchGuarded(this.provider, url, init, requestCredentials)
+              (url, init) =>
+                dispatchWithGeminiDailyQuota(
+                  this.provider,
+                  model,
+                  requestCredentials,
+                  url,
+                  init,
+                  (dispatchUrl, dispatchOptions) =>
+                    dispatchGuarded(this.provider, dispatchUrl, dispatchOptions, requestCredentials)
+                )
             )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
@@ -1721,6 +1734,7 @@ export class BaseExecutor {
           model: (serializedBody as Record<string, unknown> | null)?.model,
         };
       } catch (error) {
+        if (getTrustedGeminiDailyQuotaError(error)) throw error;
         // Distinguish timeout errors from other abort errors
         const err = error instanceof Error ? error : new Error(String(error));
         if (err.name === "TimeoutError") {

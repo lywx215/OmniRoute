@@ -42,6 +42,7 @@ export {
 };
 
 import { HTTP_STATUS } from "../../config/constants.ts";
+import { createGeminiDailyQuotaErrorResult } from "../../services/geminiDailyQuota.ts";
 import { buildMalformedResponseDiagnostic } from "../../utils/responseShapeDiagnostic.ts";
 
 import { lockModel } from "../../services/accountFallback.ts";
@@ -1085,6 +1086,23 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     };
   } catch (error) {
     trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    const dailyQuotaResult = createGeminiDailyQuotaErrorResult(error);
+    if (dailyQuotaResult) {
+      return {
+        response: dailyQuotaResult,
+        carry: {
+          translatedBody,
+          currentModel,
+          finalBody,
+          providerResponse,
+          providerHeaders,
+          effectiveServiceTier,
+          claudePromptCacheLogMeta,
+          reasoningReplayHistory,
+          pipelineRecovered,
+        },
+      };
+    }
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)

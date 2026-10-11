@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "Daily request limits",
+    "geminiDailyQuotaDescription": "Limits apply independently to each model. Counts include upstream attempts through OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Skip local RPM / TPM limits",
+    "geminiDailyQuotaMinuteLimitsDescription": "Daily limits and concurrency controls stay active; upstream limits still apply.",
+    "geminiDailyQuotaReset": "Resets {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} used · {remaining} remaining",
+    "geminiDailyQuotaEmpty": "Model counts appear after the first request.",
+    "geminiDailyQuotaBulk": "Apply daily limits to all Gemini connections ({count})",
+    "geminiDailyQuotaBulkResult": "Updated {count} connections; {failed} failed."
   },
   "settings": {
     "title": "Settings",

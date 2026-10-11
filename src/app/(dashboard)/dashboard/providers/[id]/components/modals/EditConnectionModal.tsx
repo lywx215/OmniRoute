@@ -22,11 +22,13 @@ import { maskEmail } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
+import { resolveGeminiDailyQuotaPolicy } from "@/shared/utils/geminiDailyQuota";
+import GeminiDailyQuotaSettings from "./GeminiDailyQuotaSettings";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
 import ModelConcurrencyField from "./ModelConcurrencyField";
 import {
   buildRateLimitOverridesFromForm,
-  modelConcurrencyFormValue,
+  getRateLimitOverridesFormValues,
 } from "./rateLimitOverridesFromForm";
 import { resolveDashboardProviderInfo } from "../../../providerPageUtils";
 import {
@@ -124,6 +126,7 @@ export default function EditConnectionModal({
   const connectionProviderSpecificData = connection?.providerSpecificData;
   const showFreeModelsToggle = providerHasFreeModels(provider);
   const [formData, setFormData] = useState({
+    geminiDailyQuota: resolveGeminiDailyQuotaPolicy(connectionProviderSpecificData),
     name: "",
     priority: 1,
     maxConcurrent: "",
@@ -315,41 +318,14 @@ export default function EditConnectionModal({
           ? String(connection.providerSpecificData.quotaPerUnit)
           : "";
       setFormData({
+        geminiDailyQuota: resolveGeminiDailyQuotaPolicy(connection.providerSpecificData),
         name: connection.name || "",
         priority: connection.priority || 1,
         maxConcurrent:
           connection.maxConcurrent !== null && connection.maxConcurrent !== undefined
             ? String(connection.maxConcurrent)
             : "",
-        rpm:
-          connection.rateLimitOverrides?.rpm != null
-            ? String(connection.rateLimitOverrides.rpm)
-            : "",
-        rpd:
-          connection.rateLimitOverrides?.rpd != null
-            ? String(connection.rateLimitOverrides.rpd)
-            : "",
-        tpm:
-          connection.rateLimitOverrides?.tpm != null
-            ? String(connection.rateLimitOverrides.tpm)
-            : "",
-        tpd:
-          connection.rateLimitOverrides?.tpd != null
-            ? String(connection.rateLimitOverrides.tpd)
-            : "",
-        minTime:
-          connection.rateLimitOverrides?.minTime != null
-            ? String(connection.rateLimitOverrides.minTime)
-            : "",
-        maxWaitMs:
-          connection.rateLimitOverrides?.maxWaitMs != null
-            ? String(connection.rateLimitOverrides.maxWaitMs)
-            : "",
-        rateLimitMaxConcurrent:
-          connection.rateLimitOverrides?.maxConcurrent != null
-            ? String(connection.rateLimitOverrides.maxConcurrent)
-            : "",
-        modelConcurrency: modelConcurrencyFormValue(connection.rateLimitOverrides),
+        ...getRateLimitOverridesFormValues(connection.rateLimitOverrides),
         apiKey: "",
         // Unset per-connection override means "follow the global default" —
         // surface that as an empty field (0 renders as an explicit opt-out).
@@ -722,6 +698,8 @@ export default function EditConnectionModal({
         };
       }
       if (updates.providerSpecificData) {
+        if (provider === "gemini")
+          updates.providerSpecificData.geminiDailyQuota = formData.geminiDailyQuota;
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
@@ -826,6 +804,12 @@ export default function EditConnectionModal({
           placeholder={t("excludedModelsPlaceholder")}
           hint={t("excludedModelsHint")}
         />
+        {provider === "gemini" && (
+          <GeminiDailyQuotaSettings
+            value={formData.geminiDailyQuota}
+            onChange={(geminiDailyQuota) => setFormData({ ...formData, geminiDailyQuota })}
+          />
+        )}
         {isCodex && (
           <CodexConnectionFields
             t={t}

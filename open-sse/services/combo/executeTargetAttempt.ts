@@ -106,7 +106,8 @@ import type { ResponseValidationConfig } from "./responseValidation.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
-import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { recordLocalTargetRefusal } from "./localCircuitRefusal.ts";
+import { isGeminiDailyQuotaResponse } from "../geminiDailyQuota.ts";
 
 export async function executeTargetAttempt(opts: {
   index: number;
@@ -742,8 +743,8 @@ export async function executeTargetAttempt(opts: {
       }
     }
 
-    if (isProviderCircuitOpenResult(result, errorText)) {
-      const refusal = recordLocalCircuitRefusal({
+    if (isGeminiDailyQuotaResponse(result) || isProviderCircuitOpenResult(result, errorText)) {
+      const refusal = recordLocalTargetRefusal({
         comboName: deps.combo.name,
         modelStr,
         result,
@@ -757,6 +758,7 @@ export async function executeTargetAttempt(opts: {
       state.lastError = refusal.error;
       state.lastStatus = refusal.status;
       state.comboErrors.push(refusal.outcome);
+      if (isGeminiDailyQuotaResponse(result)) state.observeFailure(true, target.executionKey);
       if (i > 0) state.fallbackCount++;
       return null;
     }

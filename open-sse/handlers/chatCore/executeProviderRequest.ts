@@ -38,6 +38,7 @@ import { invalidateCodexQuotaCache } from "../../services/codexQuotaFetcher.ts";
 import { invalidateGenericQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
 import {
   isRateLimitEnabled,
+  getRateLimitConcurrency,
   withRateLimit,
   resolveRequestQueueMaxWaitMs,
 } from "../../services/rateLimitManager.ts";
@@ -60,6 +61,7 @@ import {
 import { updatePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { resolveProviderId } from "@/shared/constants/providers";
+import { shouldBypassGeminiMinuteLimits } from "@/shared/utils/geminiDailyQuota";
 import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
@@ -246,10 +248,22 @@ export async function executeProviderRequest(
           const execCreds = getExecutionCredentials();
           const executionConnectionId = getExecutionConnectionId(execCreds);
           const attemptConnectionId = executionConnectionId || connectionId;
-          const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
+          let accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
             execCreds,
             typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
           );
+          if (
+            typeof attemptConnectionId === "string" &&
+            shouldBypassGeminiMinuteLimits(provider, execCreds?.providerSpecificData)
+          ) {
+            const limiterConcurrency = getRateLimitConcurrency(attemptConnectionId);
+            if (limiterConcurrency !== null) {
+              accountSemaphoreMaxConcurrency =
+                accountSemaphoreMaxConcurrency !== null && accountSemaphoreMaxConcurrency > 0
+                  ? Math.min(accountSemaphoreMaxConcurrency, limiterConcurrency)
+                  : limiterConcurrency;
+            }
+          }
           const accountSemaphoreKey = resolveAccountSemaphoreKey({
             provider,
             model: modelToCall,

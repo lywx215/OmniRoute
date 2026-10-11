@@ -134,6 +134,8 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "feature_disabled",
   "file_too_large",
   "gateway_timeout",
+  "gemini_daily_quota",
+  "gemini_daily_quota_exhausted",
   "gcp_project_required",
   "gemini_tpm_exhausted",
   "grok_error",

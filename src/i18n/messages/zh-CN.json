@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "每日请求限制",
+    "geminiDailyQuotaDescription": "每个模型独立计数。统计通过 OmniRoute 发往上游的请求尝试。",
+    "geminiDailyQuotaMinuteLimits": "跳过本地 RPM / TPM 限制",
+    "geminiDailyQuotaMinuteLimitsDescription": "每日限制和并发控制继续生效；上游自身的限制仍然适用。",
+    "geminiDailyQuotaReset": "太平洋时间 {time} 重置",
+    "geminiDailyQuotaUsage": "已用 {used}/{limit} · 剩余 {remaining}",
+    "geminiDailyQuotaEmpty": "首次请求后显示模型计数。",
+    "geminiDailyQuotaBulk": "应用每日限制到所有 Gemini 连接（{count}）",
+    "geminiDailyQuotaBulkResult": "已更新 {count} 个连接；{failed} 个失败。"
   },
   "settings": {
     "title": "设置",

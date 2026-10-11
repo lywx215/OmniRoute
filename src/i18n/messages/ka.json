@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "მოთხოვნების დღიური ლიმიტები",
+    "geminiDailyQuotaDescription": "ლიმიტები თითოეულ მოდელზე ცალ-ცალკე ვრცელდება. დათვლა მოიცავს OmniRoute-ის მეშვეობით პროვაიდერთან მოთხოვნის გაგზავნის მცდელობებს.",
+    "geminiDailyQuotaMinuteLimits": "ადგილობრივი RPM / TPM ლიმიტების გამოტოვება",
+    "geminiDailyQuotaMinuteLimitsDescription": "დღიური ლიმიტები და ერთდროული მოთხოვნების კონტროლი აქტიური რჩება; პროვაიდერის ლიმიტებიც კვლავ მოქმედებს.",
+    "geminiDailyQuotaReset": "განულდება {time} PT-ზე",
+    "geminiDailyQuotaUsage": "გამოყენებულია {used}/{limit} · დარჩენილია {remaining}",
+    "geminiDailyQuotaEmpty": "მოდელის მრიცხველები გამოჩნდება პირველი მოთხოვნის შემდეგ.",
+    "geminiDailyQuotaBulk": "დღიური ლიმიტების გამოყენება ყველა Gemini კავშირზე ({count})",
+    "geminiDailyQuotaBulkResult": "განახლდა {count} კავშირი; {failed} ვერ განახლდა."
   },
   "settings": {
     "title": "პარამეტრები",

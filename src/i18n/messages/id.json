@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "Batas permintaan harian",
+    "geminiDailyQuotaDescription": "Batas berlaku secara terpisah untuk setiap model. Hitungan mencakup percobaan permintaan ke penyedia melalui OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Lewati batas RPM / TPM lokal",
+    "geminiDailyQuotaMinuteLimitsDescription": "Batas harian dan kontrol konkurensi tetap aktif; batas penyedia tetap berlaku.",
+    "geminiDailyQuotaReset": "Direset pukul {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} terpakai · {remaining} tersisa",
+    "geminiDailyQuotaEmpty": "Hitungan model muncul setelah permintaan pertama.",
+    "geminiDailyQuotaBulk": "Terapkan batas harian ke semua koneksi Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "{count} koneksi diperbarui; {failed} gagal."
   },
   "settings": {
     "title": "Pengaturan",

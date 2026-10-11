@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "రోజువారీ అభ్యర్థన పరిమితులు",
+    "geminiDailyQuotaDescription": "ప్రతి మోడల్‌కు పరిమితులు విడివిడిగా వర్తిస్తాయి. లెక్కల్లో OmniRoute ద్వారా ప్రదాతకు అభ్యర్థనలు పంపే ప్రయత్నాలు కూడా ఉంటాయి.",
+    "geminiDailyQuotaMinuteLimits": "స్థానిక RPM / TPM పరిమితులను దాటవేయి",
+    "geminiDailyQuotaMinuteLimitsDescription": "రోజువారీ పరిమితులు, ఏకకాల అభ్యర్థన నియంత్రణలు సక్రియంగా ఉంటాయి; ప్రదాత పరిమితులు కూడా వర్తిస్తాయి.",
+    "geminiDailyQuotaReset": "{time} PT వద్ద మళ్లీ ప్రారంభమవుతుంది",
+    "geminiDailyQuotaUsage": "{used}/{limit} ఉపయోగించబడ్డాయి · {remaining} మిగిలాయి",
+    "geminiDailyQuotaEmpty": "మొదటి అభ్యర్థన తర్వాత మోడల్ లెక్కలు కనిపిస్తాయి.",
+    "geminiDailyQuotaBulk": "అన్ని Gemini కనెక్షన్‌లకు రోజువారీ పరిమితులను వర్తింపజేయి ({count})",
+    "geminiDailyQuotaBulkResult": "{count} కనెక్షన్‌లు నవీకరించబడ్డాయి; {failed} విఫలమయ్యాయి."
   },
   "settings": {
     "title": "సెట్టింగ్లు",

@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "Oke arịrịọ kwa ụbọchị",
+    "geminiDailyQuotaDescription": "Oke na-emetụta ụdị ọ bụla iche. Ọnụọgụ gụnyere mgbalị izipu arịrịọ nye onye na-eweta ọrụ site na OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Gafee oke RPM / TPM mpaghara",
+    "geminiDailyQuotaMinuteLimitsDescription": "Oke kwa ụbọchị na njikwa ọrụ n'otu oge ka na-arụ ọrụ; oke onye na-eweta ọrụ ka dịkwa.",
+    "geminiDailyQuotaReset": "A na-atọgharị ya na {time} PT",
+    "geminiDailyQuotaUsage": "Ejirila {used}/{limit} · {remaining} fọdụrụ",
+    "geminiDailyQuotaEmpty": "Ọnụọgụ ụdị na-apụta mgbe arịrịọ mbụ gasịrị.",
+    "geminiDailyQuotaBulk": "Tinye oke kwa ụbọchị na njikọ Gemini niile ({count})",
+    "geminiDailyQuotaBulkResult": "Emelitere njikọ {count}; {failed} dara."
   },
   "settings": {
     "title": "Ntọala",

@@ -37,6 +37,12 @@ import {
 import { checkQueueAdmission } from "./rateLimitManager/admission";
 import { buildOverrideUpdates, loadOverrideMap } from "./rateLimitManager/overrideUpdates";
 import {
+  resolveOverride,
+  resolveRpm,
+  resolveMinTime,
+  resolveMaxConcurrent,
+} from "./rateLimitManager/overrideResolution.ts";
+import {
   markLocalRateLimitError,
   RATE_LIMIT_EXECUTION_TIMEOUT_CODE,
   RATE_LIMIT_QUEUE_WEDGED_CODE,
@@ -51,6 +57,7 @@ import {
   resolveConnectionTimeoutMs,
 } from "../handlers/chatCore/upstreamTimeouts.ts";
 import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
+import { shouldBypassGeminiMinuteLimits } from "@/shared/utils/geminiDailyQuota";
 
 interface LearnedLimitEntry {
   provider: string;
@@ -165,30 +172,6 @@ function isAutoEnableActive(settings: RequestQueueSettings): boolean {
   return settings.autoEnableApiKeyProviders;
 }
 
-// Sentinels for "no rate limit" / effectively infinite capacity. The reservoir
-// value uses Number.MAX_SAFE_INTEGER so the bucket can never realistically be
-// exhausted; maxConcurrent uses a smaller-but-still-vast ceiling since
-// Bottleneck tracks concurrent jobs in memory and an unbounded number would
-// risk internal counter overflow under sustained pressure.
-const EFFECTIVELY_INFINITE = Number.MAX_SAFE_INTEGER;
-const EFFECTIVELY_INFINITE_CONCURRENCY = 1000;
-
-// Shared override-resolution rule for every per-connection rate-limit field:
-// a positive override wins, 0 or missing falls through to `fallback`.
-function resolveOverride(override: number | undefined | null, fallback: number): number {
-  return typeof override === "number" && override > 0 ? override : fallback;
-}
-
-// Resolve an RPM override. 0 or missing means "infinite" (no rate cap).
-function resolveRpm(override: number | undefined | null): number {
-  return resolveOverride(override, EFFECTIVELY_INFINITE);
-}
-
-// Resolve a minTime override. 0 or missing means "no minimum gap".
-function resolveMinTime(override: number | undefined | null): number {
-  return resolveOverride(override, 0);
-}
-
 function hasRpmOverride(connectionId: string): boolean {
   const rpm = connectionRateLimitOverrides.get(connectionId)?.rpm;
   return typeof rpm === "number" && rpm > 0;
@@ -232,9 +215,15 @@ function capSettingsWithinBudget(
   return settings;
 }
 
-// Resolve a maxConcurrent override. 0 or missing means "effectively infinite".
-function resolveMaxConcurrent(override: number | undefined | null): number {
-  return resolveOverride(override, EFFECTIVELY_INFINITE_CONCURRENCY);
+/** Preserve the limiter's concurrency ceiling when daily-only mode skips pacing. */
+export function getRateLimitConcurrency(connectionId: string): number | null {
+  if (!enabledConnections.has(connectionId)) return null;
+  return resolveMaxConcurrent(
+    resolveOverride(
+      connectionRateLimitOverrides.get(connectionId)?.maxConcurrent,
+      currentRequestQueueSettings.concurrentRequests
+    )
+  );
 }
 
 export function resolveRequestQueueMaxWaitMs(
@@ -693,6 +682,10 @@ export async function withRateLimit(
     err.name = "AbortError";
     throw err;
   }
+
+  // The caller still acquires global/provider/account concurrency gates. Daily
+  // reservations happen immediately before transport dispatch, including retries.
+  if (shouldBypassGeminiMinuteLimits(provider, opts?.providerSpecificData)) return fn();
 
   const queueBudgetMs = resolveRequestQueueMaxWaitMs(
     provider,

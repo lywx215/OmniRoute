@@ -27,7 +27,9 @@ import {
   providerCircuitOpenResponse,
   unavailableResponse,
 } from "@omniroute/open-sse/utils/error.ts";
-import { inheritTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors.ts";
+import { inheritChatResponseIdentity } from "./chat/responseIdentity.ts";
+import { createGeminiDailyQuotaErrorResult } from "@omniroute/open-sse/services/geminiDailyQuota.ts";
+export { withSelectedConnectionHeader } from "./chat/responseIdentity.ts";
 import { isRequestScopedUpstreamFailure } from "./comboFailureLogging";
 import { isCodexNativeResponsesRequest } from "./requestShapeGuards";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
@@ -52,10 +54,7 @@ import { classify429FromError, type FailureKind } from "../../shared/utils/class
 import { resolveUseUpstream429BreakerHints } from "../../shared/utils/providerHints";
 import { resolveProviderId } from "../../shared/constants/providers";
 import { classifyProviderProbeResult } from "./providerProbeClassification";
-import {
-  inheritProviderProbeResponse,
-  markProviderProbeResponse,
-} from "../../shared/utils/providerProbeResult";
+import { markProviderProbeResponse } from "../../shared/utils/providerProbeResult";
 import { isFeatureFlagEnabled } from "../../shared/utils/featureFlags";
 
 import { noteProxyOutcome } from "./proxyOutcomeMemory";
@@ -774,6 +773,8 @@ export function handleNoCredentials(
   shadowedNode: ShadowedProviderNode | null = null,
   correlationId?: string | null
 ) {
+  const dailyQuotaResult = createGeminiDailyQuotaErrorResult(credentials);
+  if (dailyQuotaResult) return dailyQuotaResult.response;
   if (credentials?.allRateLimited) {
     const errorMsg = lastError || credentials.lastError || "Unavailable";
     const status =
@@ -1200,7 +1201,7 @@ export function withSessionHeader(response: Response, sessionId: string | null):
       headers: response.headers,
     });
     cloned.headers.set("X-OmniRoute-Session-Id", sessionId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritChatResponseIdentity(response, cloned);
   }
 }
 
@@ -1217,7 +1218,7 @@ export function withCorrelationId(response: Response, correlationId: string | nu
       headers: response.headers,
     });
     cloned.headers.set("X-Correlation-Id", correlationId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritChatResponseIdentity(response, cloned);
   }
 }
 
@@ -1260,25 +1261,5 @@ export function withConversationId(response: Response, conversationId: string | 
     });
     cloned.headers.set("X-ConversationId", conversationId);
     return cloned;
-  }
-}
-
-export function withSelectedConnectionHeader(
-  response: Response,
-  connectionId: string | null | undefined
-): Response {
-  if (!response || !connectionId) return response;
-  try {
-    response.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    const trusted = inheritTrustedLocalRateLimitResponse(response, cloned);
-    return inheritProviderProbeResponse(response, trusted);
   }
 }

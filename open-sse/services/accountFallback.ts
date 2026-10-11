@@ -56,12 +56,7 @@ import {
   isAntigravityQuotaProvider,
 } from "./antigravityQuotaFamily.ts";
 import { persistAntigravityFamilyCooldownIfQuota } from "./antigravityFamilyCooldown.ts";
-import {
-  classifyGeminiQuotaMetricFromText,
-  isRpdExhausted,
-  isRpmExhausted,
-  isTpmExhausted,
-} from "./geminiRateLimitTracker.ts";
+import { classifyGeminiQuotaMetricFromText } from "./geminiRateLimitTracker.ts";
 import { setConnectionRateLimitUntil } from "@/lib/db/providers";
 import {
   parseRetryHintFromJsonBody,
@@ -1930,15 +1925,8 @@ export function checkFallbackError(
     // (#7360). Gated on provider === "gemini" so it cannot affect any other
     // provider's genuine credits-exhausted classification.
     //
-    // Preference order:
-    //  1. The upstream error text's own metric name (authoritative — it is
-    //     Google's own signal, e.g. "...free_tier_input_token_count..." = TPM).
-    //     Required because the local per-model counters below only increment
-    //     on a SUCCESSFUL response; a request that gets rejected — especially
-    //     the first of several concurrent requests racing to trip the same
-    //     per-minute limit — never contributes to the counter, so it can read
-    //     0 at the exact moment it needs to report exhaustion.
-    //  2. Local per-model counters, when the text names no metric.
+    // Only Google's metric identifies the exhausted window. The old global
+    // model counters mix independent keys and cannot classify this connection.
     if (provider === "gemini" && status === HTTP_STATUS.RATE_LIMITED && _model) {
       const metricClass = classifyGeminiQuotaMetricFromText(errorStr);
       if (metricClass === "rpd") {
@@ -1947,15 +1935,7 @@ export function checkFallbackError(
       if (metricClass === "rpm" || metricClass === "tpm") {
         return buildRetryableFallback(RateLimitReason.RATE_LIMIT_EXCEEDED);
       }
-      if (isRpdExhausted(_model)) {
-        return buildRetryableFallback(RateLimitReason.QUOTA_EXHAUSTED);
-      }
-      if (isRpmExhausted(_model)) {
-        return buildRetryableFallback(RateLimitReason.RATE_LIMIT_EXCEEDED);
-      }
-      if (isTpmExhausted(_model)) {
-        return buildRetryableFallback(RateLimitReason.RATE_LIMIT_EXCEEDED);
-      }
+      return buildRetryableFallback(RateLimitReason.RATE_LIMIT_EXCEEDED);
     }
 
     // T10 (sub2api #1169) + #8247: credits/quota exhausted; per-model-quota providers stay model-scoped

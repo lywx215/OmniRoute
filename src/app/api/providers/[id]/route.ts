@@ -5,6 +5,7 @@ import {
   summarizeProviderConnectionForAudit,
 } from "@/lib/compliance/providerAudit";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
+import { getGeminiDailyQuotaProjection } from "@/lib/db/geminiDailyQuota";
 import { updateProviderConnection } from "@/lib/db/providers";
 import { clearRequestRejectedStreak } from "@omniroute/open-sse/services/requestRejectedStreak.ts";
 import { deleteProviderConnection } from "@/lib/db/providers/deletion";
@@ -85,6 +86,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     // Hide or mask sensitive fields
     const result: Record<string, any> = { ...connection };
+    if (connection.provider === "gemini") {
+      result.geminiDailyQuotaStatus = getGeminiDailyQuotaProjection(
+        id,
+        connection.providerSpecificData
+      );
+    }
     if (!revealKeys) {
       result.apiKey = result.apiKey ? maskStoredApiKey(result.apiKey) : undefined;
     }

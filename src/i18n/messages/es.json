@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Créditos de pago de Codex desactivados",
     "failedUpdateCodexPaidCredits": "No se pudo actualizar la política de créditos de pago de Codex",
     "allowCodexPaidCreditsLabel": "Permitir créditos de pago de Codex",
-    "allowCodexPaidCreditsDescription": "Permite que esta cuenta use créditos de pago cuando su cuota de suscripción alcance el umbral. Requiere créditos disponibles informados por OpenAI; puede generar cargos. Los límites de Spark y los enfriamientos del proveedor siguen aplicándose. La disponibilidad de créditos se comprueba aunque la verificación previa de cuota esté desactivada, salvo que el filtrado local de cuota esté totalmente desactivado (verificación previa de cuota y política de límites, ambas desactivadas)."
+    "allowCodexPaidCreditsDescription": "Permite que esta cuenta use créditos de pago cuando su cuota de suscripción alcance el umbral. Requiere créditos disponibles informados por OpenAI; puede generar cargos. Los límites de Spark y los enfriamientos del proveedor siguen aplicándose. La disponibilidad de créditos se comprueba aunque la verificación previa de cuota esté desactivada, salvo que el filtrado local de cuota esté totalmente desactivado (verificación previa de cuota y política de límites, ambas desactivadas).",
+    "geminiDailyQuotaTitle": "Límites diarios de solicitudes",
+    "geminiDailyQuotaDescription": "Los límites se aplican por separado a cada modelo. Los recuentos incluyen los intentos de solicitudes al proveedor a través de OmniRoute.",
+    "geminiDailyQuotaMinuteLimits": "Omitir límites locales de RPM / TPM",
+    "geminiDailyQuotaMinuteLimitsDescription": "Los límites diarios y los controles de concurrencia siguen activos; los límites del proveedor también se aplican.",
+    "geminiDailyQuotaReset": "Se restablece a las {time} PT",
+    "geminiDailyQuotaUsage": "{used}/{limit} usados · {remaining} restantes",
+    "geminiDailyQuotaEmpty": "Los recuentos por modelo aparecen después de la primera solicitud.",
+    "geminiDailyQuotaBulk": "Aplicar límites diarios a todas las conexiones Gemini ({count})",
+    "geminiDailyQuotaBulkResult": "Se actualizaron {count} conexiones; fallaron {failed}."
   },
   "settings": {
     "title": "Configuración",

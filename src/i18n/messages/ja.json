@@ -6739,7 +6739,16 @@
     "codexPaidCreditsDisabled": "Codex paid credits disabled",
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "geminiDailyQuotaTitle": "1日あたりのリクエスト上限",
+    "geminiDailyQuotaDescription": "上限はモデルごとに個別に適用されます。OmniRoute 経由で上流に送信を試みた回数を含みます。",
+    "geminiDailyQuotaMinuteLimits": "ローカルの RPM / TPM 制限をスキップ",
+    "geminiDailyQuotaMinuteLimitsDescription": "1日あたりの上限と同時実行制御は引き続き有効です。上流の制限も適用されます。",
+    "geminiDailyQuotaReset": "{time} PT にリセット",
+    "geminiDailyQuotaUsage": "{used}/{limit} 使用済み · 残り {remaining}",
+    "geminiDailyQuotaEmpty": "モデルごとの回数は最初のリクエスト後に表示されます。",
+    "geminiDailyQuotaBulk": "すべての Gemini 接続に1日あたりの上限を適用 ({count})",
+    "geminiDailyQuotaBulkResult": "{count} 件の接続を更新、{failed} 件失敗。"
   },
   "settings": {
     "title": "設定",

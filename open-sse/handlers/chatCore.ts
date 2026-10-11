@@ -322,6 +322,7 @@ import {
 import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";
 import { classifyModelScope429, isModelScopeProvider } from "../services/modelscopePolicy.ts";
 import { incrementTokenUsage, isTpmExhausted } from "../services/geminiRateLimitTracker.ts";
+import { shouldBypassGeminiMinuteLimits } from "@/shared/utils/geminiDailyQuota";
 import { getProactiveCompressionRatio } from "@/lib/db/compression";
 
 /**
@@ -3144,7 +3145,10 @@ async function handleChatCoreInner({
   // ── Gemini pre-dispatch TPM / RPM guard ──────────────────────────────────
   // Avoids guaranteed upstream 429 by checking local sliding-window counters
   // before dispatch. Fail-open: counter errors → allow through.
-  if (provider === "gemini") {
+  if (
+    provider === "gemini" &&
+    !shouldBypassGeminiMinuteLimits(provider, credentials?.providerSpecificData)
+  ) {
     try {
       if (isTpmExhausted(effectiveModel)) {
         trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);

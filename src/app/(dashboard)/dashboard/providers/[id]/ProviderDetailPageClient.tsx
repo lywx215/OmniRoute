@@ -57,6 +57,7 @@ import ProviderModelsSection from "./components/ProviderModelsSection";
 import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
 import CoolingConnectionsPanel from "./components/CoolingConnectionsPanel";
+import GeminiDailyQuotaBulkButton from "./components/GeminiDailyQuotaBulkButton";
 import ConnectionsHeaderToolbar from "./components/ConnectionsHeaderToolbar";
 import VolcengineConnectModal from "./components/VolcengineConnectModal";
 import ProviderAccountRoutingCard from "../../settings/components/ProviderAccountRoutingCard";
@@ -690,6 +691,9 @@ export default function ProviderDetailPageClient() {
             />
           ) : (
             <>
+              {providerId === "gemini" && (
+                <GeminiDailyQuotaBulkButton connections={connections} onSaved={fetchConnections} />
+              )}
               <CoolingConnectionsPanel
                 connections={connections}
                 onClearCooldown={handleClearCooldown}

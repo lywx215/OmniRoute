@@ -6739,7 +6739,16 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "geminiDailyQuotaTitle": "ଦୈନିକ ଅନୁରୋଧ ସୀମା",
+    "geminiDailyQuotaDescription": "ପ୍ରତ୍ୟେକ ମଡେଲ୍ ପାଇଁ ସୀମା ଅଲଗା ଭାବେ ଲାଗୁ ହୁଏ। ଗଣନାରେ OmniRoute ମାଧ୍ୟମରେ ପ୍ରଦାନକାରୀଙ୍କୁ ଅନୁରୋଧ ପଠାଇବାର ପ୍ରୟାସ ସାମିଲ ଅଛି।",
+    "geminiDailyQuotaMinuteLimits": "ସ୍ଥାନୀୟ RPM / TPM ସୀମା ଛାଡ଼ନ୍ତୁ",
+    "geminiDailyQuotaMinuteLimitsDescription": "ଦୈନିକ ସୀମା ଓ ଏକକାଳୀନ ଅନୁରୋଧ ନିୟନ୍ତ୍ରଣ ସକ୍ରିୟ ରହେ; ପ୍ରଦାନକାରୀଙ୍କ ସୀମା ମଧ୍ୟ ଲାଗୁ ହୁଏ।",
+    "geminiDailyQuotaReset": "{time} PT ରେ ପୁନଃ ଆରମ୍ଭ ହେବ",
+    "geminiDailyQuotaUsage": "{used}/{limit} ବ୍ୟବହୃତ · {remaining} ଅବଶିଷ୍ଟ",
+    "geminiDailyQuotaEmpty": "ପ୍ରଥମ ଅନୁରୋଧ ପରେ ମଡେଲ୍ ଗଣନା ଦେଖାଯିବ।",
+    "geminiDailyQuotaBulk": "ସମସ୍ତ Gemini ସଂଯୋଗରେ ଦୈନିକ ସୀମା ଲାଗୁ କରନ୍ତୁ ({count})",
+    "geminiDailyQuotaBulkResult": "{count}ଟି ସଂଯୋଗ ଅଦ୍ୟତନ ହୋଇଛି; {failed}ଟି ବିଫଳ ହୋଇଛି।"
   },
   "settings": {
     "title": "ସେଟିଂସ୍",
