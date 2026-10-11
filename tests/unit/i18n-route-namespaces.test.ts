@@ -19,6 +19,7 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createTranslator } from "next-intl";
 
 import {
   analyzeRouteNamespaces,
@@ -59,6 +60,33 @@ test("every dashboard section has a SectionI18nProvider layout", () => {
     [],
     "sections without a provider layout fall back to chrome-only messages"
   );
+});
+
+test("the /home route mounts its own home catalog instead of chrome-only messages", () => {
+  const layoutPath = join(REPO_ROOT, "src", "app", "(dashboard)", "home", "layout.tsx");
+  assert.ok(
+    existsSync(layoutPath),
+    "/home needs its own provider after /dashboard redirects to it"
+  );
+  const source = readFileSync(layoutPath, "utf8");
+  assert.match(source, /<SectionI18nProvider\s+namespaces=\{sectionNamespaces\.home\}>/);
+  assert.match(source, /\{children\}/);
+});
+
+test("the home catalog translates the screenshot keys in Chinese and English", () => {
+  const { home } = JSON.parse(readFileSync(MAP_PATH, "utf8"));
+  for (const locale of ["zh-CN", "en"]) {
+    const catalog = JSON.parse(
+      readFileSync(join(REPO_ROOT, "src", "i18n", "messages", `${locale}.json`), "utf8")
+    );
+    const messages = pickMessages(catalog, home);
+    const translate = createTranslator({ locale, messages, namespace: "home" });
+    for (const key of ["quickStart", "step1Title", "providerTopology", "recentRequestsModel"]) {
+      assert.equal(translate(key), catalog.home[key]);
+      assert.notEqual(translate(key), `home.${key}`);
+    }
+    assert.ok(home.includes("usage"), "home quota widgets also need the usage namespace");
+  }
 });
 
 test("every section set includes the chrome namespaces", () => {
