@@ -126,6 +126,24 @@ python3 scripts/ops/prepare-zeabur-web.py \
 4. 对该 `upload_id` 调用 `/v2/upload/{upload_id}/prepare`，指定现有服务与环境。
 5. 记录提交时间、上传 ID、部署 ID，后续只跟踪同一任务。
 
+这些步骤现由 [单次上传与状态查询脚本](../../scripts/ops/submit-zeabur-web.py) 执行。
+脚本读取共享工具已有凭据与服务映射，校验 ZIP 与发布清单一致，直接上传原 ZIP。
+执行 `submit` 代表发布操作，必须已有明确发布授权；`status` 只读取已有任务。
+
+```bash
+python3 scripts/ops/submit-zeabur-web.py submit \
+  --alias OmniRoute --package-dir /private/tmp/omniroute-zeabur-next
+python3 scripts/ops/submit-zeabur-web.py status \
+  --alias OmniRoute --package-dir /private/tmp/omniroute-zeabur-next
+```
+
+`submission.json` 在第一次网络提交前创建，并逐步保存上传 ID、服务、环境和旧部署 ID。
+已有该文件时，脚本拒绝再次 `submit`，包括第一次操作超时的情况。
+提交未确认时退出码为 `2`，不代表任务已失败；随后运行 `status`，按 `uploadID`
+匹配后台任务，不把列表最新条目直接认作这次发布。等待状态未匹配到任务时继续观察。
+若上传 ID 尚未取得，先核查目标和已创建任务；不要删除记录来绕过重复提交保护。
+脚本不自动重试任何发布请求，不输出预签名地址、API 密钥或上游错误正文。
+
 不要把准备好的目录再次交给旧 `archive_project()`，否则其按名称排除规则会重新造成源码缺失。
 不要打印凭据、Cookie、预签名地址或加密密钥。
 
@@ -165,6 +183,8 @@ python3 scripts/ops/prepare-zeabur-web.py \
 健康或数据库检查失败时，切回发布前记录的实际镜像，再执行相同运行验收。
 数据库恢复需要先核对迁移兼容性，不能盲目用旧镜像读取已迁移的数据。
 本次可用的发布前镜像是官方 `3.8.51-web`；以后以各次发布前记录为准。
+2026-10-11 翻译修复重试前，回滚基线已是上一轮实际构建的 `3.8.52`：
+`registry-oci.zeabur.cloud/e-6a957b21e9580d2806c946ca/s-6a9c26e973ae037aa4de36e8:d-6aca4d48da7cf920c2637301`。
 
 ## 6. 维护这些保护措施
 
@@ -175,6 +195,7 @@ python3 scripts/ops/prepare-zeabur-web.py \
 
 ```bash
 python3 tests/unit/zeabur_package_test.py
+python3 tests/unit/zeabur_submit_test.py
 npm run check:docs-all
 ```
 
@@ -186,3 +207,23 @@ npm run check:docs-all
 `40,734,557` 字节的发布 ZIP，核对了四个还原路径与关键构建文件。
 文档检查仍输出仓库原有的潜在版本/日期漂移提示，但没有阻断错误。
 本轮仅验证打包流程，没有上传该验证包，也没有执行新的完整镜像构建。
+
+## 7. 翻译修复重试记录（2026-10-11）
+
+重试源码提交是 `2e747990284fdab59619fdbd6e41f492322511c0`，基于上一轮 `main`
+加入首页翻译布局、路由审计和中文文案修复，应用版本仍为 `3.8.52`。
+发布使用固定提交源码包，不依赖尚未启用的 GitHub Actions。
+
+- 本地路由审计：160 个界面、1951 个模块，缺失字面量键及命名空间均为 0。
+- 新发布 ZIP：`40,751,704` 字节，SHA-256 为
+  `a39c95178cca775bad98c54ce6b968176210dcaef3741952834d8fe044b0919d`。
+- 发布前备份：`/app/data/backups/pre-i18n-2e74799028-20261011.sqlite`，
+  `18,456,576` 字节，SQLite `quick_check=ok`。
+- 09:49 提交上传 `e08741388f3c2a5d02958350`；提交调用读取超时，随后跟踪同一上传，未重复提交。
+
+发布前的真实浏览器基线确认 `/home` HTTP `200`，但可见文字仍含 `home.quickStart`
+等键，`快速入门` 未显示，并记录 110 条国际化错误。**HTML 字符串包含中文不构成
+界面验收证据**：页面会嵌入翻译数据，故直接搜索响应 HTML 可产生假阳性。
+应登录后读取浏览器实际可见文字，同时检查国际化控制台错误。
+
+该重试的构建与上线结果将在完成验收后记录；上述提交超时本身不能判定部署成功或失败。
