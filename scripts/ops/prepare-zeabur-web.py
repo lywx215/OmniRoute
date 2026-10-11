@@ -173,7 +173,7 @@ def prepare(repo, ref, output, policy):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--ref", default="main", help="Committed Git ref to package")
+    parser.add_argument("--ref", required=True, help="Reviewed committed Git ref to package")
     parser.add_argument("--repo", type=Path, default=ROOT)
     parser.add_argument("--output", type=Path, required=True, help="New directory outside repo")
     parser.add_argument("--policy", type=Path, default=ROOT / "config/deploy/zeabur-web.json")

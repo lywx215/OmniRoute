@@ -21,6 +21,11 @@ DEPLOYMENTS_QUERY = """query PreparedUpload($s:ObjectID!,$e:ObjectID!) {
     edges { node { _id uploadID status createdAt startedAt finishedAt } }
   }
 }"""
+RUNTIME_QUERY = """query PreparedRuntime($p:ObjectID!,$s:ObjectID!,$e:ObjectID!,$d:ObjectID!) {
+  runtimeLogs(projectID:$p,serviceID:$s,environmentID:$e,deploymentID:$d) {
+    timestamp message
+  }
+}"""
 
 
 def load_tool(path):
@@ -115,7 +120,45 @@ def submit(directory, alias, tool):
     return 0
 
 
-def status(directory, alias, tool):
+def timestamp(value):
+    try:
+        return datetime.datetime.fromisoformat(str(value or "").replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return float("-inf")
+
+
+def recent_build_logs(tool, profile, deployment_id, limit):
+    rows = sorted(tool.fetch_logs(profile, "build", deployment_id),
+                  key=lambda row: timestamp(row.get("timestamp")))
+    result = []
+    for row in rows[-limit:]:
+        message = str(row.get("message", ""))
+        message = re.sub(r"--mount=type=secret,\S+\s*", "", message)
+        message = re.sub(r"(https?://[^\s?]+)\?[^\s]+", r"\1?[redacted]", message)
+        message = re.sub(r"(?i)(Bearer\s+)\S+", r"\1[redacted]", message)
+        result.append({"timestamp": row.get("timestamp"), "message": message})
+    return result
+
+
+def runtime_summary(tool, profile, deployment):
+    boundary = timestamp(deployment.get("startedAt") or deployment.get("createdAt"))
+    if boundary == float("-inf"):
+        raise ValueError("Deployment start time unknown; cannot distinguish old runtime logs")
+    rows = tool.graphql(RUNTIME_QUERY, {"p": profile["project_id"],
+                                       "s": profile["service_id"],
+                                       "e": profile["environment_id"],
+                                       "d": deployment["_id"]})["runtimeLogs"]
+    current = sorted((row for row in rows if timestamp(row.get("timestamp")) >= boundary),
+                     key=lambda row: timestamp(row.get("timestamp")))
+    # Report only the returned window and its age; never expose runtime request
+    # bodies or credentials. This summary is not a health or inference verdict.
+    return {"deploymentId": deployment["_id"], "returnedRows": len(rows),
+            "currentRows": len(current), "excludedOlderOrUndatedRows": len(rows) - len(current),
+            "firstTimestamp": current[0]["timestamp"] if current else None,
+            "latestTimestamp": current[-1]["timestamp"] if current else None}
+
+
+def status(directory, alias, tool, logs=0, runtime=False):
     state = directory / "submission.json"
     record = json.loads(state.read_text())
     profile = tool.get_project(alias)
@@ -131,8 +174,13 @@ def status(directory, alias, tool):
     if match:
         record.update(deploymentId=match["_id"], deploymentStatus=match["status"])
         write_record(state, record)
-    print(json.dumps({"service": data["service"], "uploadId": record["uploadId"],
-                      "deployment": match, "latest": rows[0] if rows else None}))
+    evidence = {"service": data["service"], "uploadId": record["uploadId"],
+                "deployment": match, "latest": rows[0] if rows else None}
+    if match and logs > 0:
+        evidence["buildLogs"] = recent_build_logs(tool, profile, match["_id"], logs)
+    if match and runtime:
+        evidence["runtimeSummary"] = runtime_summary(tool, profile, match)
+    print(json.dumps(evidence))
     return 0
 
 
@@ -142,6 +190,9 @@ def main():
     parser.add_argument("--package-dir", type=Path, required=True)
     parser.add_argument("--alias", required=True)
     parser.add_argument("--shared-tool", type=Path, default=SHARED_TOOL)
+    parser.add_argument("--logs", type=int, default=0, help="Newest build log lines for status")
+    parser.add_argument("--runtime-summary", action="store_true",
+                        help="Inspect this deployment's runtime log timestamps without messages")
     args = parser.parse_args()
     try:
         # Prevent duplicate attempts even before loading credentials or making a
@@ -150,7 +201,9 @@ def main():
             print("Submission already recorded; use status instead of submitting again", file=sys.stderr)
             return 1
         tool = load_tool(args.shared_tool)
-        return (submit if args.mode == "submit" else status)(args.package_dir, args.alias, tool)
+        if args.mode == "submit":
+            return submit(args.package_dir, args.alias, tool)
+        return status(args.package_dir, args.alias, tool, logs=args.logs, runtime=args.runtime_summary)
     except Exception as error:
         # Deliberately avoid upstream exception messages (they may contain URLs).
         print("Zeabur operation could not be confirmed: " + type(error).__name__, file=sys.stderr)

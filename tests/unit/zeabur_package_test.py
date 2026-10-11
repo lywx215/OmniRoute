@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import subprocess
 import sys
 import tarfile
 import tempfile
@@ -19,6 +20,15 @@ POLICY = json.loads((ROOT / "config/deploy/zeabur-web.json").read_text())
 
 
 class PackageRegressionTests(unittest.TestCase):
+    def test_cli_requires_an_explicit_reviewed_source_ref(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "package"
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/ops/prepare-zeabur-web.py"),
+                                     "--output", str(output)], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("required: --ref", result.stderr)
+            self.assertFalse(output.exists())
+
     def test_nested_build_env_and_hidden_routes_survive_zip_and_restore(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "context"
