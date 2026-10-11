@@ -24,6 +24,7 @@ import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
 import { readAddedWait } from "../../utils/proxyFetch.ts";
+import { clonePipelineClientStreamChunks } from "../../services/responseModelEcho.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
 
@@ -280,6 +281,8 @@ export type PersistAttemptLogsContext = {
   pendingRequestId: unknown;
   clientRawRequest: { endpoint?: string } | null | undefined;
   requestedModel: unknown;
+  /** Current client-facing model, used only for captured response presentation. */
+  echoModel?: string | null;
   credentials: { connectionId?: string } | null | undefined;
   startTime: number;
   body: unknown;
@@ -418,6 +421,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     reqLogger,
     clientRawRequest,
     requestedModel,
+    echoModel,
     credentials,
     startTime,
     body,
@@ -503,10 +507,10 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   const capturedPipeline = videoContentRemoved
     ? null
     : (reqLogger?.getPipelinePayloads?.() ?? null);
-  const pipelinePayloads = videoContentRemoved
+  let pipelinePayloads = videoContentRemoved
     ? null
     : detailedLoggingEnabled
-      ? (capturedPipeline ?? {})
+      ? { ...capturedPipeline }
       : capturedPipeline?.routeDecision
         ? { routeDecision: capturedPipeline.routeDecision }
         : null;
@@ -551,6 +555,11 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
           client: [...earlyClientBytes, ...(existingStreamChunks.client ?? [])],
         };
       }
+    }
+    // Converted chunks were captured before the final stream echo. Include the
+    // outer keepalive frames above, then present only a copy of the client bytes.
+    if (detailedLoggingEnabled && echoModel) {
+      pipelinePayloads = clonePipelineClientStreamChunks(pipelinePayloads, echoModel);
     }
   }
 

@@ -15,6 +15,10 @@ lastUpdated: 2026-08-28
 
 ## TL;DR
 
+For Zeabur deployments with Gemini Web, use the
+[Zeabur Web deployment runbook](./ZEABUR_WEB_DEPLOYMENT.md), including the verified
+source packaging fallback and post-deployment browser checks.
+
 ```bash
 # 1. Bump version + generate CHANGELOG (skill)
 /version-bump-cc patch    # or minor/major

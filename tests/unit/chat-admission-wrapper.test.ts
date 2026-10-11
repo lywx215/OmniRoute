@@ -109,6 +109,35 @@ describe("resolveAdmissionTenantKey", () => {
   });
 });
 
+describe("request context propagation", () => {
+  it("forwards context after the explicit lifecycle signal without changing either", async () => {
+    const requestContext = { originalRequestedModel: "gemini-2.5-pro" };
+    const lifecycle = new AbortController();
+    const handle = withChatAdmission(
+      async (_request, _raw, _body, _id, admission, signal, context) => {
+        assert.equal(typeof admission.acquire, "function");
+        assert.equal(signal, lifecycle.signal);
+        assert.equal(context, requestContext);
+        return new Response("ok");
+      }
+    );
+    const response = await handle({}, null, null, "request-id", lifecycle.signal, requestContext);
+    assert.equal(await response.text(), "ok");
+  });
+
+  it("preserves calls that omit the optional context", async () => {
+    const handle = withChatAdmission(
+      async (_request, _raw, _body, _id, admission, signal, context) => {
+        assert.equal(typeof admission.acquire, "function");
+        assert.equal(signal, undefined);
+        assert.equal(context, undefined);
+        return new Response("ok");
+      }
+    );
+    assert.equal((await handle({})).status, 200);
+  });
+});
+
 describe("captureDeferredClientRawBody", () => {
   it("captures only fixed mutable fields and restores client-visible values after admission", () => {
     let enumerations = 0;

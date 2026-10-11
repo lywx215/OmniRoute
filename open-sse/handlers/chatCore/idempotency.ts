@@ -3,6 +3,7 @@ import { getIdempotencyKey, checkIdempotency } from "@/lib/idempotencyLayer";
 import { calculateCost } from "@/lib/usage/costCalculator";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import type { EffectiveServiceTier } from "./serviceTier.ts";
+import { cloneResponseWithModel } from "../../services/responseModelEcho.ts";
 
 type HeadersLike = Headers | Record<string, unknown> | null | undefined;
 type IdempotencyRequest = { headers?: HeadersLike } | null | undefined;
@@ -129,6 +130,7 @@ export async function checkIdempotencyCache({
   startTime,
   log,
   videoTranscriptSensitive,
+  echoModel,
 }: {
   clientRawRequest: IdempotencyRequest;
   provider: string;
@@ -140,6 +142,8 @@ export async function checkIdempotencyCache({
   startTime: number;
   log: LoggerLike;
   videoTranscriptSensitive?: boolean;
+  /** Current response presentation; excluded from the execution/idempotency identity. */
+  echoModel?: string | null;
 }): Promise<{ hit: { success: true; response: Response } | null; idempotencyKey: string | null }> {
   // A response may quote the video transcript. No key means neither a replay
   // from a previous entry nor a write at chatCore's later save site.
@@ -179,11 +183,13 @@ export async function checkIdempotencyCache({
       usage: idempotentUsage,
       costUsd: idempotentCost,
     });
+    const canonicalResponse = cloneResponseWithModel(cachedIdemp.response, model);
+    const clientResponse = cloneResponseWithModel(canonicalResponse, echoModel);
     return {
       idempotencyKey,
       hit: {
         success: true,
-        response: new Response(JSON.stringify(cachedIdemp.response), {
+        response: new Response(JSON.stringify(clientResponse), {
           status: cachedIdemp.status,
           headers,
         }),

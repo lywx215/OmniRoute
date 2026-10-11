@@ -262,8 +262,10 @@ export function orderHeaders(
 }
 
 /**
- * Internal request-body markers that are NOT `_omniroute*`-prefixed and must be
- * removed key-by-key. Everything else is caught by INTERNAL_BODY_FIELD_PREFIX.
+ * Internal request-body markers and context lookalikes that are NOT
+ * `_omniroute*`-prefixed and must be removed key-by-key. Trusted model context
+ * travels outside the body; caller-supplied JSON cannot become upstream fields.
+ * Everything else is caught by INTERNAL_BODY_FIELD_PREFIX.
  */
 /**
  * Markers consumed by the EXECUTOR, not by routing: `codex.ts` and `xai.ts` read
@@ -277,6 +279,13 @@ export const EXECUTOR_CONSUMED_BODY_FIELDS: readonly string[] = [
   "_nativeCodexPassthrough",
   "_nativeXaiResponsesPassthrough",
   "_nativeOpenAICompatibleResponsesPassthrough",
+];
+
+// Presentation context belongs to server function arguments, never upstream JSON.
+const REQUEST_CONTEXT_BODY_FIELDS: readonly string[] = [
+  "originalRequestedModel",
+  "clientRequestedModel",
+  "requestContext",
 ];
 
 const INTERNAL_BODY_FIELDS: readonly string[] = [...EXECUTOR_CONSUMED_BODY_FIELDS];
@@ -306,6 +315,9 @@ export function stripInternalBodyFields(
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
 
   const record = body as Record<string, unknown>;
+  for (const field of REQUEST_CONTEXT_BODY_FIELDS) {
+    delete record[field];
+  }
   if (!options.keepExecutorMarkers) {
     for (const field of INTERNAL_BODY_FIELDS) {
       delete record[field];

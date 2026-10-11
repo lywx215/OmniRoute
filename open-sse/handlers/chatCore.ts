@@ -129,7 +129,6 @@ import {
   stripIncompatibleMessageContent,
 } from "../services/modelStrip.ts";
 import { shouldUseMidConversationSystem } from "../executors/claudeIdentity.ts";
-import { echoModelInObject } from "../services/responseModelEcho.ts";
 import { getUnsupportedParams, REGISTRY } from "../config/providerRegistry.ts";
 
 import { checkToolCallingRequiredButUnsupported } from "./chatCore/toolCallingRequiredCheck.ts";
@@ -152,7 +151,7 @@ import {
   isFeatureFlagEnabled,
   isServerOwnedToolLoopEnabled,
 } from "@/shared/utils/featureFlags.ts";
-import { resolveNoAuthEchoModel } from "./chatCore/noAuthEchoModel.ts";
+import { resolveResponseEchoModel } from "./chatCore/responseEchoPolicy.ts";
 import { toPositiveInteger } from "../services/reasoningTokenBuffer.ts";
 import {
   buildErrorBody,
@@ -363,6 +362,7 @@ export async function handleChatCore(args: Parameters<typeof handleChatCoreInner
 
 async function handleChatCoreInner({
   body,
+  originalRequestedModel = undefined,
   modelInfo,
   credentials,
   log,
@@ -443,11 +443,8 @@ async function handleChatCoreInner({
     }
   }
   // Per-request model-routing metadata (first extracted slice of the request-setup phase).
-  const { apiFormat, customModelTargetFormat, requestedModel } = resolveChatCoreRequestSetup(
-    modelInfo,
-    body,
-    model
-  );
+  const { apiFormat, customModelTargetFormat, requestedModel, clientRequestedModel } =
+    resolveChatCoreRequestSetup(modelInfo, body, model, originalRequestedModel);
   const isModelScope = () => isModelScopeProvider(provider, credentials?.providerSpecificData);
   const startTime = Date.now();
   // Per-request trace id + checkpoint helper. Lets us see exactly which await
@@ -518,12 +515,14 @@ async function handleChatCoreInner({
     };
   };
   let tokensCompressed: number | null = null;
+  // Read settings once for request enrichment and response presentation.
+  const settings = cachedSettings ?? (await getCachedSettings());
   // ── Per-endpoint custom system prompt (port of upstream #2063) ──
   // Reads from cachedSettings if available (passed in from combo/chat layer)
   // to avoid an extra DB read on the hot path. Falls through to getCachedSettings()
   // only when this function is called outside the normal chat dispatch.
   {
-    const _s = cachedSettings ?? (await getCachedSettings());
+    const _s = settings;
     if (
       _s.customSystemPromptEnabled === true &&
       typeof _s.customSystemPrompt === "string" &&
@@ -634,6 +633,18 @@ async function handleChatCoreInner({
     copilotCompatibleReasoning,
     clientResponseFormat,
   } = resolveChatCoreRequestFormat({ clientRawRequest, body, provider, userAgent });
+  // Resolve presentation once, before any cache or synthetic success can return.
+  const isCodexResponsesEcho =
+    (isResponsesEndpoint || sourceFormat === FORMATS.OPENAI_RESPONSES) &&
+    isCodexOriginatedHeaders(clientRawRequest?.headers);
+  const echoModel = resolveResponseEchoModel({
+    clientRequestedModel,
+    requestedModel,
+    provider,
+    echoRequestedModelName: settings.echoRequestedModelName,
+    isCodexResponsesEcho,
+    isClaudeCodeClient: isClaudeCodeOriginatedHeaders(clientRawRequest?.headers),
+  });
   // ── Phase 9.2: Idempotency check ──
   // Resolve the idempotency key once here and reuse it at the Phase 9.2 save site below,
   // rather than re-deriving it. (#3821-review LEDGER-6)
@@ -646,6 +657,7 @@ async function handleChatCoreInner({
     body,
     apiKeyId: apiKeyInfo?.id ?? null,
     effectiveServiceTier,
+    echoModel,
     startTime,
     log,
     videoTranscriptSensitive: videoBridgeObserved,
@@ -695,7 +707,7 @@ async function handleChatCoreInner({
   if (requestedLifecycleError) return requestedLifecycleError;
 
   // Check for bypass patterns (warmup, skip) - return fake response
-  const bypassResponse = handleBypassRequest(body, model, userAgent);
+  const bypassResponse = handleBypassRequest(body, echoModel ?? model, userAgent);
   if (bypassResponse) {
     return bypassResponse;
   }
@@ -703,7 +715,7 @@ async function handleChatCoreInner({
   // Synthetic classifier ALLOW stays opt-in; ordinary classifier calls still go upstream
   // with the native-thinking default applied below. See claudeClassifierCompat.ts.
   {
-    const classifierSettings = cachedSettings ?? (await getCachedSettings());
+    const classifierSettings = settings;
     if (
       shouldDefaultAllowClassifier(
         sourceFormat,
@@ -716,7 +728,7 @@ async function handleChatCoreInner({
         "CHAT",
         `classifier compat=${classifierSettings.claudeClassifierCompat} format=${classifierFormat} | short-circuit default-allow`
       );
-      return buildDefaultAllowClaudeMessage(requestedModel, classifierFormat);
+      return buildDefaultAllowClaudeMessage(echoModel ?? requestedModel, classifierFormat);
     }
   }
   body = applyClaudeClassifierReasoningDefault(
@@ -818,6 +830,7 @@ async function handleChatCoreInner({
   const pendingConnId = connectionId || credentials?.connectionId || null;
   const pendingRequestId =
     trackPendingRequest(model, provider, pendingConnId, true, {
+      requestedModel: clientRequestedModel,
       clientEndpoint: clientRawRequest?.endpoint || "/v1/chat/completions",
       clientRequest: redactPendingBody(clientRawRequest?.body ?? body, videoBridgeObserved),
       providerRequest: initialPendingBody(body, effectiveModel, videoBridgeObserved),
@@ -908,40 +921,12 @@ async function handleChatCoreInner({
     );
   }
   const noLogEnabled = apiKeyInfo?.noLog === true;
-  // Consolidate settings reads — fetch once, reuse throughout the request
-  const settings = cachedSettings ?? (await getCachedSettings());
   // Opt-in tool-source diagnostics (#1825): summarize the request's tool definitions
   // (count + MCP/hosted/client source breakdown + first names) as a single debug line.
   if (settings.logToolSources === true) {
     const toolSummary = summarizeToolSources((body as { tools?: unknown }).tools);
     if (toolSummary) log?.debug?.("TOOLS", toolSummary);
   }
-  // #1311 (opt-in): echo the client-requested alias/combo name in the response `model`
-  // field instead of the upstream model, so strict clients (Claude Desktop) that validate
-  // response.model === request.model stop rejecting alias/combo requests with a 401.
-  // #3697: always echo it for Codex CLI clients on the Responses API — regardless of the
-  // opt-in setting — since the Codex CLI status line/model button reads `response.model`
-  // to display the active model + reasoning effort (e.g. `gpt-5.5-xhigh`). Detection is by
-  // request headers (originator/User-Agent), not by the routed provider, so it still fires
-  // when `codex/gpt-5.5-xhigh` is routed through a combo to a non-codex upstream.
-  const isCodexResponsesEcho =
-    (isResponsesEndpoint || sourceFormat === FORMATS.OPENAI_RESPONSES) &&
-    isCodexOriginatedHeaders(clientRawRequest?.headers);
-
-  // Detect Claude Code CLI so we can auto-enable model echo — this prevents
-  // session restore failures when the resolved upstream model (e.g.
-  // `oc/nemotron-3-ultra-free`) is not recognized by the client on `--resume`.
-  const isClaudeCodeClient = isClaudeCodeOriginatedHeaders(clientRawRequest?.headers);
-
-  let echoModel =
-    (settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient) &&
-    typeof requestedModel === "string" &&
-    requestedModel
-      ? requestedModel
-      : null;
-  // Auto-echo the listing-valid form for bare requests to noAuth catalog
-  // providers so clients validating response.model against /v1/models don't warn.
-  echoModel = resolveNoAuthEchoModel(requestedModel, provider) ?? echoModel;
   const detailedLoggingEnabled =
     !noLogEnabled &&
     (settings.call_log_pipeline_enabled === true ||
@@ -994,7 +979,8 @@ async function handleChatCoreInner({
       reqLogger,
       pendingRequestId,
       clientRawRequest,
-      requestedModel,
+      requestedModel: clientRequestedModel,
+      echoModel,
       credentials,
       startTime,
       body,
@@ -1201,6 +1187,7 @@ async function handleChatCoreInner({
     startTime,
     log,
     persistAttemptLogs,
+    echoModel,
     apiKeyId: apiKeyInfo?.id ?? undefined,
     cacheDefaultMode: (apiKeyInfo as { cacheDefaultMode?: "legacy" | "bypass" } | null)
       ?.cacheDefaultMode,
@@ -3746,7 +3733,6 @@ async function handleChatCoreInner({
       describeMalformedNonStream,
       detectMalformedNonStream,
       echoModel,
-      echoModelInObject,
       effectiveModel,
       effectiveServiceTier,
       emitRequestGamificationEvent,

@@ -46,6 +46,7 @@ import {
 } from "./tokenAccounting";
 
 export type PendingRequestMetadata = {
+  requestedModel?: string | null;
   clientEndpoint?: string | null;
   clientRequest?: unknown;
   providerRequest?: unknown;
@@ -71,6 +72,7 @@ export type PendingRequestDetail = {
   };
   id: string;
   model: string;
+  requestedModel?: string | null;
   provider: string;
   connectionId: string | null;
   startedAt: number;
@@ -117,6 +119,9 @@ function normalizePendingMetadata(metadata?: PendingRequestMetadata): PendingReq
 
   const normalized: PendingRequestMetadata = {};
 
+  if (metadata.requestedModel !== undefined) {
+    normalized.requestedModel = toStringOrNull(metadata.requestedModel) || null;
+  }
   if (metadata.clientEndpoint !== undefined) {
     normalized.clientEndpoint = toStringOrNull(metadata.clientEndpoint) || null;
   }
@@ -477,16 +482,10 @@ export function trackPendingRequest(
         ? pendingIdByCorrelation.get(normalizedMetadata.correlationId)?.id
         : undefined;
       const newDetail = {
-        // crypto RNG (not Math.random) to satisfy CodeQL js/insecure-randomness —
-        // this pending-request id flows into attempt logging; it's a correlation
-        // id, not a security secret.
-        // A pending id must be unique across CONCURRENT requests, and thousands can
-        // be tracked inside one millisecond. The old `${now}-${uuid.slice(0,6)}`
-        // form had only a 24-bit random suffix, so a 5,000-request burst collided
-        // ~52% of the time (birthday bound); `pendingById.set` then silently
-        // overwrote the earlier entry, so a live request's pending row vanished
-        // from the map while its bucket still listed it. Keep the timestamp for
-        // ordering/readability, and add a monotonic counter + full random bytes.
+        // Crypto RNG satisfies CodeQL js/insecure-randomness: this is a
+        // correlation id, not a secret. The old 24-bit suffix collided ~52%
+        // in a 5,000-request burst within one millisecond, overwriting pending
+        // map entries. Keep the timestamp and use a counter plus random bytes.
         id:
           reusableId ??
           `${now}-${(globalThis.crypto.randomUUID() as string).replace(/-/g, "").slice(0, 12)}-${(++pendingIdSequence).toString(

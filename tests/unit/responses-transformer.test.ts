@@ -96,6 +96,30 @@ test("createResponsesApiTransformStream converts plain chat deltas into Response
     total_tokens: 3,
   });
   assert.equal(doneMarker.data, "[DONE]");
+  assert.equal(completed.model, undefined, "a model absent from the source is not invented");
+});
+
+test("Responses lifecycle events preserve the model already presented by chat core", async () => {
+  const presentedModel = "gemini-2.5-pro";
+  const content = '{"model":"content-must-not-change"}';
+  const output = await runTransformStream([
+    `data: ${JSON.stringify({
+      id: "chatcmpl_model_echo",
+      model: presentedModel,
+      choices: [{ index: 0, delta: { content } }],
+    })}\n\n`,
+    'data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n',
+  ]);
+  const events = parseSseOutput(output);
+  for (const eventType of ["response.created", "response.in_progress", "response.completed"]) {
+    const event = events.find((item) => item.event === eventType);
+    assert.ok(event, `${eventType} must be emitted`);
+    assert.equal(JSON.parse(event.data).response.model, presentedModel);
+  }
+  const completed = JSON.parse(
+    events.find((event) => event.event === "response.completed").data
+  ).response;
+  assert.equal(completed.output[0].content[0].text, content);
 });
 
 test("createResponsesApiTransformStream preserves prompt-format think tags by default", async () => {

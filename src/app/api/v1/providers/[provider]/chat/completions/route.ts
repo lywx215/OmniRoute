@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { buildClientRawRequest, handleChat } from "@/sse/handlers/chat";
+import { captureChatRequestContext } from "@/sse/handlers/chat/requestContext";
 import { initTranslators } from "@omniroute/open-sse/translator/index.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
@@ -72,6 +73,7 @@ async function postHandler(request, { params }) {
   }
 
   const body = parsed.data as { model?: string; [key: string]: unknown };
+  const requestContext = captureChatRequestContext(rawBody);
 
   // Validate model belongs to this provider
   if (body.model) {
@@ -105,7 +107,14 @@ async function postHandler(request, { params }) {
     signal: request.signal,
   });
 
-  return await handleChat(newRequest, () => buildClientRawRequest(request, rawBody));
+  return await handleChat(
+    newRequest,
+    () => buildClientRawRequest(request, rawBody, undefined, requestContext.originalRequestedModel),
+    null,
+    undefined,
+    undefined,
+    requestContext
+  );
 }
 
 export const POST = withChatAdmission(postHandler);

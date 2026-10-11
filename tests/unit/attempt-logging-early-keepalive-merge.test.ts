@@ -111,6 +111,48 @@ test("bytes recorded before persistAttemptLogs are prepended into pipeline.strea
   ]);
 });
 
+test("merged early frames and fragmented client chunks persist the echoed name without changing provider logs", async () => {
+  const id = "attempt-keepalive-model-echo";
+  const correlationId = "corr-keepalive-model-echo";
+  recordEarlyKeepaliveBytes(
+    correlationId,
+    'event: response.created\ndata: {"response":{"model":"upstream"}}\n\n'
+  );
+  const captured = {
+    streamChunks: {
+      provider: ['[00:00:05.000] data: {"model":"upstream"}\n\n'],
+      openai: ['[00:00:05.000] data: {"model":"upstream"}\n\n'],
+      client: [
+        '[00:00:05.000] data: {"model":"up',
+        '[00:00:05.001] stream","choices":[]}\n\ndata: [DONE]\n\n',
+      ],
+    },
+  };
+  const unchanged = structuredClone(captured);
+  persistAttemptLogs(
+    { status: 200, clientResponse: { model: "Gemini/Pro" } },
+    baseCtx({
+      pendingRequestId: id,
+      correlationId,
+      echoModel: "Gemini/Pro",
+      reqLogger: { getPipelinePayloads: () => captured },
+    })
+  );
+  const row = await pollForCallLog(correlationId);
+  assert.ok(row);
+  const pipeline = row.pipelinePayloads as typeof captured & { clientResponse: { model: string } };
+  const text = pipeline.streamChunks.client
+    .map((chunk) => chunk.replace(/^\[\d{2}:\d{2}:\d{2}\.\d{3}\] /, ""))
+    .join("");
+  assert.ok(text.includes('"response":{"model":"Gemini/Pro"}'));
+  assert.ok(text.includes('"model":"Gemini/Pro","choices"'));
+  assert.ok(!text.includes("upstream"));
+  assert.deepEqual(pipeline.streamChunks.provider, unchanged.streamChunks.provider);
+  assert.deepEqual(pipeline.streamChunks.openai, unchanged.streamChunks.openai);
+  assert.equal(pipeline.clientResponse.model, "Gemini/Pro");
+  assert.deepEqual(captured.streamChunks, unchanged.streamChunks);
+});
+
 test("bytes are consumed exactly once — a repeat lookup for the same correlationId finds nothing left to merge", async () => {
   const correlationId = "corr-keepalive-merge-2";
   recordEarlyKeepaliveBytes(correlationId, "[00:00:00.100] : keepalive\n\n");

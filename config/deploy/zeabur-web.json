@@ -1,0 +1,7 @@
+{
+  "browserImage": "docker.io/diegosouzapw/omniroute:3.8.51-web@sha256:dcec56b564b6cd92972f180ae9f9e46710f1b748d138cd477b4c9700d4d9309a",
+  "playwrightVersion": "1.62.1",
+  "chromiumRevision": "1234",
+  "chromiumVersion": "151.0.7922.34",
+  "verifiedOn": "2026-10-11"
+}

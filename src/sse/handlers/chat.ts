@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
 import * as chatAdmission from "./chatAdmission.ts";
 import { buildClientRawRequest, resolveDispatchClientRawRequest } from "./chat/clientRawRequest.ts";
+import { prepareChatRequest, type ChatRequestContext } from "./chat/requestContext.ts";
 export { buildClientRawRequest, resolveDispatchClientRawRequest };
 import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
 import { isDetailedLoggingEnabled } from "@/lib/db/detailedLogs";
@@ -423,7 +424,8 @@ async function handleChatImplementation(
   preParsedBody: any = null,
   correlationId: string | undefined,
   admissionContext: chatAdmission.ChatAdmissionContext,
-  signal: AbortSignal | null = request?.signal ?? null // #15010 deadline-aware lifecycle signal
+  signal: AbortSignal | null = request?.signal ?? null, // #15010 deadline-aware lifecycle signal
+  requestContext?: ChatRequestContext
 ) {
   const peerRejection = rejectPeerRequest(request?.headers, log.warn, errorResponse);
   if (peerRejection) return peerRejection;
@@ -455,33 +457,20 @@ async function handleChatImplementation(
     });
   }
 
-  // Only the server's policy resolver may attach execution directives or route traces.
-  // Discard lookalike JSON fields supplied by callers before evaluating any rule.
-  if (body && typeof body === "object") {
-    body = { ...body };
-    delete body._omnirouteReasoningRule;
-    delete body._omnirouteReasoningRouteTrace;
-    delete body._omniroutePreviousResponseResumed;
-  }
+  const { body: workingBody, originalRequestedModel } = prepareChatRequest(body, requestContext);
+  body = workingBody;
 
   const sourceFormat = detectFormatFromUrl(body, request.url);
 
-  // Early guard: an invalid `messages` field is rejected here with a clear
-  // OmniRoute-level 400 before any routing or upstream call (#5110, #6402).
-  // Without this guard, schema-invalid bodies fell through to model resolution
-  // and surfaced as a misleading 404 `model_not_found` from chatHelpers.ts (#6402).
-  // Cases covered:
-  //   - present-but-non-array (null, number, string, object) → 400 (#6402)
-  //   - empty array → 400 ("at least one message is required") (#5110)
-  //   - missing entirely, when the Responses-API `input` discriminator is also
-  //     absent → 400 (#6402). Responses-API requests use `input` (not `messages`),
-  //     and Antigravity requests use a cloudcode `request` envelope.
+  // Reject malformed/missing messages before routing (#5110/#6402). Responses use `input`,
+  // and Antigravity uses a cloudcode envelope; invalid entries get a clear local 400.
   const msgBody = body as { messages?: unknown; input?: unknown };
   if ("messages" in msgBody && !Array.isArray(msgBody.messages)) {
     log.warn("CHAT", "Rejecting request with non-array messages");
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, "messages: Expected array"), {
       path: new URL(request.url).pathname,
       model: typeof body?.model === "string" && body.model ? body.model : "-",
+      requestedModel: originalRequestedModel,
       requestBody: body ?? null,
       apiKeyId: null,
       apiKeyName: null,
@@ -495,6 +484,7 @@ async function handleChatImplementation(
       {
         path: new URL(request.url).pathname,
         model: typeof body?.model === "string" && body.model ? body.model : "-",
+        requestedModel: originalRequestedModel,
         requestBody: body ?? null,
         apiKeyId: null,
         apiKeyName: null,
@@ -515,6 +505,7 @@ async function handleChatImplementation(
       {
         path: new URL(request.url).pathname,
         model: typeof body?.model === "string" && body.model ? body.model : "-",
+        requestedModel: originalRequestedModel,
         requestBody: body ?? null,
         apiKeyId: null,
         apiKeyName: null,
@@ -529,6 +520,7 @@ async function handleChatImplementation(
       {
         path: new URL(request.url).pathname,
         model: typeof body?.model === "string" && body.model ? body.model : "-",
+        requestedModel: originalRequestedModel,
         requestBody: body ?? null,
         apiKeyId: null,
         apiKeyName: null,
@@ -537,11 +529,8 @@ async function handleChatImplementation(
     );
   }
 
-  // Reject non-string `model` before it reaches downstream code that calls
-  // `.toLowerCase()` / `.split()` / `.startsWith()` on it (crash-then-500 with an
-  // empty body, escaping the error sanitizer — #6407). An explicit `null`/`undefined`
-  // stays permitted here because the existing `Missing model` guard below returns a
-  // clean 400 for those; anything else that is not a string is a client type error.
+  // Reject non-string models before downstream string operations (#6407).
+  // Null/undefined stay under the existing Missing model guard; other types get a local 400.
   const rawModel = (body as { model?: unknown }).model;
   if (rawModel !== undefined && rawModel !== null && typeof rawModel !== "string") {
     log.warn("CHAT", `Rejecting non-string model (typeof=${typeof rawModel})`);
@@ -553,6 +542,7 @@ async function handleChatImplementation(
       {
         path: new URL(request.url).pathname,
         model: "-",
+        requestedModel: originalRequestedModel,
         requestBody: body ?? null,
         apiKeyId: null,
         apiKeyName: null,
@@ -705,6 +695,7 @@ async function handleChatImplementation(
     return logHandlerRejection(errorResponse(HTTP_STATUS.BAD_REQUEST, "Missing model"), {
       path: new URL(request.url).pathname,
       model: "-",
+      requestedModel: originalRequestedModel,
       requestBody: body ?? null,
       apiKeyId: null,
       apiKeyName: null,
@@ -737,6 +728,7 @@ async function handleChatImplementation(
       {
         path: new URL(request.url).pathname,
         model: modelStr,
+        requestedModel: originalRequestedModel,
         requestBody: body ?? null,
         apiKeyId: null,
         apiKeyName: null,
@@ -765,6 +757,7 @@ async function handleChatImplementation(
     return logHandlerRejection(policy.rejection, {
       path: new URL(request.url).pathname,
       model: modelStr,
+      requestedModel: originalRequestedModel,
       requestBody: body ?? null,
       apiKeyId: policy.apiKeyInfo?.id ?? null,
       apiKeyName: policy.apiKeyInfo?.name ?? null,
@@ -858,6 +851,7 @@ async function handleChatImplementation(
     void logAdmissionRejection(admissionRejection, {
       path: new URL(request.url).pathname,
       model: typeof body?.model === "string" && body.model ? body.model : "-",
+      requestedModel: originalRequestedModel,
       requestBody: body ?? null,
       apiKeyId: apiKeyInfo?.id ?? null,
       apiKeyName: apiKeyInfo?.name ?? null,
@@ -866,14 +860,13 @@ async function handleChatImplementation(
     return admissionRejection;
   }
   clientRawRequest = chatAdmission.resolveClientRawAfterAdmission(clientRawRequest, () =>
-    deferredClientRawBody.withClientBody((b) => buildClientRawRequest(request, b, signal))
+    deferredClientRawBody.withClientBody((clientBody) =>
+      buildClientRawRequest(request, clientBody, signal, originalRequestedModel)
+    )
   );
-  // Sibling of clientRawRequest.body, not a replacement: .body stays the raw
-  // pre-reconstruction client bytes (see captureDeferredClientRawBody), while
-  // this is the `input` actually dispatched with -- after the
-  // previous_response_id reconstruction above ran, when it applies. A future
-  // continuation lookup against THIS response must resolve from this field,
-  // not the raw one. See the logClientRawRequest doc comment in requestLogger.ts.
+  // Keep raw pre-reconstruction bytes in .body and dispatched continuation input
+  // in .effectiveInput, which future continuation lookups must use.
+  // See captureDeferredClientRawBody and logClientRawRequest in requestLogger.ts.
   if (clientRawRequest && Array.isArray((body as { input?: unknown }).input)) {
     (clientRawRequest as { effectiveInput?: unknown }).effectiveInput = (
       body as { input: unknown[] }
@@ -910,6 +903,7 @@ async function handleChatImplementation(
       {
         path: new URL(request.url).pathname,
         model: modelStr,
+        requestedModel: originalRequestedModel,
         requestBody: body ?? null,
         apiKeyId: apiKeyInfo?.id ?? null,
         apiKeyName: apiKeyInfo?.name ?? null,
@@ -1015,6 +1009,7 @@ async function handleChatImplementation(
     return logHandlerRejection(errorResponse(hookResponse.status, hookResponse.body as any), {
       path: new URL(request.url).pathname,
       model: modelStr,
+      requestedModel: originalRequestedModel,
       requestBody: body ?? null,
       apiKeyId: apiKeyInfo?.id ?? null,
       apiKeyName: apiKeyInfo?.name ?? null,
@@ -1277,6 +1272,7 @@ async function handleChatImplementation(
           apiKeyInfo,
           telemetry,
           {
+            originalRequestedModel,
             sessionId,
             sessionAffinityKey,
             forceLiveComboTest: isComboLiveTest,
@@ -1371,6 +1367,7 @@ async function handleChatImplementation(
               apiKeyInfo,
               telemetry,
               {
+                originalRequestedModel,
                 sessionId,
                 sessionAffinityKey,
                 emergencyFallbackTried: true,
@@ -1414,7 +1411,7 @@ async function handleChatImplementation(
         await recordRejectedRequestUsage({
           status: response.status,
           model: body?.model || resolvedModelStr,
-          requestedModel: body?.model || resolvedModelStr,
+          requestedModel: originalRequestedModel ?? body?.model ?? resolvedModelStr,
           provider: resolveRejectedComboProvider(body?.model || resolvedModelStr, combo.name),
           endpoint: clientRawRequest?.endpoint,
           error: await getComboFailureLogError(response, combo.name),
@@ -1462,6 +1459,7 @@ async function handleChatImplementation(
     apiKeyInfo,
     telemetry,
     {
+      originalRequestedModel,
       sessionId,
       sessionAffinityKey,
       forceLiveComboTest: isComboLiveTest,
@@ -1503,6 +1501,7 @@ async function handleSingleModelChat(
   apiKeyInfo: any = null,
   telemetry: any = null,
   runtimeOptions: {
+    originalRequestedModel?: string;
     emergencyFallbackTried?: boolean;
     forceLiveComboTest?: boolean;
     sessionId?: string | null;
@@ -1598,6 +1597,7 @@ async function handleSingleModelChat(
           apiKeyInfo,
           telemetry,
           {
+            originalRequestedModel: runtimeOptions.originalRequestedModel,
             sessionId: "", // safety-net redirect doesn't have session context
             forceLiveComboTest: false,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
@@ -2121,6 +2121,7 @@ async function handleSingleModelChat(
             bypassCircuitBreaker: forceLiveComboTest || hasForcedConnection,
             breaker,
             body: requestBody,
+            originalRequestedModel: runtimeOptions.originalRequestedModel,
             provider,
             model: effectiveModel,
             refreshedCredentials,

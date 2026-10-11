@@ -17,6 +17,7 @@
  *   - `src/app/(dashboard)/dashboard/<section>/layout.tsx` — a tiny provider
  *     layout per section (only created when missing; hand-edited files are
  *     left alone and reported).
+ *   - `src/app/(dashboard)/home/layout.tsx` — the active home route provider.
  *
  * Usage: node scripts/i18n/generate-route-namespaces.mjs
  */
@@ -64,6 +65,27 @@ const analysis = analyzeRouteNamespaces();
 
 // Map file: the source of truth consumed at runtime.
 writeFileSync(MAP_PATH, `${JSON.stringify(analysis, null, 2)}\n`);
+
+// /home is a sibling of /dashboard, so it cannot inherit the legacy home layout.
+const homeLayoutPath = join(REPO_ROOT, "src", "app", "(dashboard)", "home", "layout.tsx");
+if (!existsSync(homeLayoutPath)) {
+  mkdirSync(dirname(homeLayoutPath), { recursive: true });
+  writeFileSync(
+    homeLayoutPath,
+    `${GENERATED_MARKER}
+import { SectionI18nProvider } from "@/i18n/SectionI18nProvider";
+import sectionNamespaces from "@/i18n/routeNamespaces.generated.json";
+
+/** Home content needs its catalog in addition to the dashboard chrome. */
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
+  return <SectionI18nProvider namespaces={sectionNamespaces.home}>{children}</SectionI18nProvider>;
+}
+`
+  );
+  console.log("home layout created: src/app/(dashboard)/home/layout.tsx");
+} else if (!readFileSync(homeLayoutPath, "utf8").includes("SectionI18nProvider")) {
+  console.log("WARNING: pre-existing home layout without SectionI18nProvider");
+}
 
 // Section layouts.
 let created = 0;

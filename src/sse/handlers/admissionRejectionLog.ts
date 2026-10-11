@@ -15,6 +15,7 @@ import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeS
 export interface AdmissionRejectionLogEntry {
   path: string;
   model: string;
+  requestedModel?: string;
   requestBody: unknown;
   apiKeyId: string | null;
   apiKeyName: string | null;
@@ -39,16 +40,30 @@ export async function logAdmissionRejection(
 ): Promise<void> {
   try {
     const admissionError = await extractAdmissionRejectionReason(rejection);
+    const originalRequestedModel =
+      typeof entry.requestedModel === "string" && entry.requestedModel.trim()
+        ? entry.requestedModel
+        : undefined;
+    const requestBody =
+      cloneLogPayload(redactVideoTranscriptFieldsForLog(entry.requestBody)) ?? null;
+    if (
+      originalRequestedModel &&
+      requestBody &&
+      typeof requestBody === "object" &&
+      !Array.isArray(requestBody)
+    ) {
+      (requestBody as Record<string, unknown>).model = originalRequestedModel;
+    }
     await saveCallLog({
       method: "POST",
       path: entry.path,
       status: rejection.status,
       model: entry.model,
-      requestedModel: entry.model,
+      requestedModel: originalRequestedModel ?? entry.model,
       provider: "-",
       duration: 0,
       error: admissionError,
-      requestBody: cloneLogPayload(redactVideoTranscriptFieldsForLog(entry.requestBody)) ?? null,
+      requestBody,
       apiKeyId: entry.apiKeyId,
       apiKeyName: entry.apiKeyName,
       correlationId: entry.correlationId,

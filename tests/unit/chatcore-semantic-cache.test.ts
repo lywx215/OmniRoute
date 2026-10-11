@@ -22,6 +22,8 @@ const { formatOmniRouteCost } = await import("../../src/domain/omnirouteResponse
 const { translateNonStreamingResponse } =
   await import("../../open-sse/handlers/responseTranslator.ts");
 const { extractUsageFromResponse } = await import("../../open-sse/handlers/usageExtractor.ts");
+const { getSemanticCacheManager } =
+  await import("../../open-sse/services/cache/semanticCacheManager.ts");
 
 test.after(() => {
   core.resetDbInstance();
@@ -222,6 +224,68 @@ test("transcript-observed requests bypass existing semantic-cache hits", async (
   assert.equal(result, null);
   assert.equal(persistCalls.length, 0);
   assert.equal(convertedCalls.length, 0);
+});
+
+test("semantic cache replays the current alias without mutating shared response identity", async () => {
+  clearCache();
+  const cached = {
+    model: "stale-alias",
+    choices: [
+      { index: 0, message: { role: "assistant", content: "cached" }, finish_reason: "stop" },
+    ],
+    usage: { prompt_tokens: 2, completion_tokens: 1, total_tokens: 3 },
+  };
+  const first = makeHitArgs({ echoModel: "Gemini/Gemini-2.5-Pro" });
+  seedHit(first.args, cached);
+  for (const alias of ["Gemini/Gemini-2.5-Pro", "other-alias", null]) {
+    const { args, persistCalls, convertedCalls } = makeHitArgs({ echoModel: alias });
+    const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+    assert.ok(result);
+    const payload = await result.response.json();
+    assert.equal(payload.model, alias ?? "gpt-4o");
+    assert.equal(result.response.headers.get(OMNIROUTE_RESPONSE_HEADERS.model), "gpt-4o");
+    assert.equal((persistCalls[0].clientResponse as { model: string }).model, alias ?? "gpt-4o");
+    assert.equal((persistCalls[0].responseBody as { model: string }).model, "gpt-4o");
+    assert.equal((convertedCalls[0] as { model: string }).model, alias ?? "gpt-4o");
+    assert.equal(cached.model, "stale-alias");
+  }
+  const streamed = await checkSemanticCache(
+    makeHitArgs({ echoModel: "stream-alias", stream: true }).args as Parameters<
+      typeof checkSemanticCache
+    >[0]
+  );
+  assert.ok(streamed);
+  const text = await streamed.response.text();
+  const models = text
+    .split("\n")
+    .filter((line) => line.startsWith("data: {"))
+    .map((line) => JSON.parse(line.slice(6)).model);
+  assert.ok(models.length > 0);
+  assert.ok(models.every((model) => model === "stream-alias"));
+  assert.equal(cached.model, "stale-alias");
+});
+
+test("manager cached SSE chunks echo the current request and keep stored chunks unchanged", async (t) => {
+  const chunks = [
+    { model: "stale-alias", choices: [] },
+    { type: "response.completed", response: { model: "stale-alias" } },
+    { type: "message_start", message: { model: "stale-alias" } },
+  ];
+  t.mock.method(getSemanticCacheManager(), "lookup", async () => ({
+    hit: true,
+    type: "exact",
+    entry: { response: { model: "stale-alias", choices: [] }, streamChunks: chunks },
+  }));
+  const { args } = makeHitArgs({ echoModel: "current-request", stream: true });
+  const result = await checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+  assert.ok(result);
+  const text = await result.response.text();
+  assert.ok(text.includes('"model":"current-request"'));
+  assert.ok(!text.includes("stale-alias"));
+  assert.ok(text.includes("data: [DONE]"));
+  assert.equal(chunks[0].model, "stale-alias");
+  assert.equal(chunks[1].response?.model, "stale-alias");
+  assert.equal(chunks[2].message?.model, "stale-alias");
 });
 
 test("checkSemanticCache returns a non-streaming JSON HIT with cache headers + logging side effects", async () => {

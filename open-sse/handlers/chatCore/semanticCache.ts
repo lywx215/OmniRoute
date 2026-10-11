@@ -13,6 +13,7 @@ import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
+import { cloneResponseWithModel, echoModelInSseLine } from "../../services/responseModelEcho.ts";
 
 export function isSemanticCacheEnabled(
   settings: Record<string, unknown>,
@@ -43,6 +44,7 @@ export async function checkSemanticCache({
   apiKeyId,
   cacheDefaultMode,
   videoTranscriptSensitive,
+  echoModel,
 }: {
   semanticCacheEnabled: boolean;
   // Only the fields this read path actually touches are named; everything else
@@ -61,6 +63,8 @@ export async function checkSemanticCache({
   apiKeyId?: string | null;
   cacheDefaultMode?: "legacy" | "bypass" | null;
   videoTranscriptSensitive?: boolean;
+  /** Current presentation only; cached response identity and keys remain target-based. */
+  echoModel?: string | null;
 }) {
   if (videoTranscriptSensitive) return null;
   // Per-key bypass: skip cache lookup entirely when the API key opts out.
@@ -107,7 +111,9 @@ export async function checkSemanticCache({
 
     if (cached) {
       log?.debug?.("CACHE", `Semantic cache HIT (${hitType}) for ${model} (stream=${stream})`);
-      reqLogger.logConvertedResponse(cached);
+      const canonicalResponse = cloneResponseWithModel(cached, model);
+      const clientResponse = cloneResponseWithModel(canonicalResponse, echoModel);
+      reqLogger.logConvertedResponse(clientResponse);
       const cachedUsage =
         extractUsageFromResponse(cached, provider) ||
         (cached?.usage as Record<string, unknown> | undefined);
@@ -119,10 +125,10 @@ export async function checkSemanticCache({
       persistAttemptLogs({
         status: 200,
         tokens: cached?.usage,
-        responseBody: cached,
+        responseBody: canonicalResponse,
         providerRequest: null,
         providerResponse: null,
-        clientResponse: cached,
+        clientResponse,
         // Both hit types are served without an upstream call; attemptLogging only
         // knows "semantic" | "upstream", so a similarity hit must not fall through
         // to "upstream" (#14159). The hit type is surfaced via the response headers.
@@ -133,14 +139,23 @@ export async function checkSemanticCache({
       // multiple requests share the same connection.
       finalizePendingScope(pendingScope, {
         status: 200,
-        providerResponse: cached,
-        clientResponse: cached,
+        providerResponse: canonicalResponse,
+        clientResponse,
       });
 
       const cachedSse = stream
-        ? managerResult.entry
-          ? manager.synthesizeSseFromEntry(managerResult.entry)
-          : synthesizeOpenAiSseFromJson(JSON.stringify(cached))
+        ? (managerResult.entry
+            ? manager.synthesizeSseFromEntry({
+                ...managerResult.entry,
+                response: canonicalResponse,
+              })
+            : synthesizeOpenAiSseFromJson(JSON.stringify(canonicalResponse))
+          )
+            // Stored stream chunks can contain a previous alias too. Rewrite
+            // synthesized frames, never the shared manager entry/chunk objects.
+            .split("\n")
+            .map((line) => echoModelInSseLine(line, echoModel || model))
+            .join("\n")
         : "";
 
       const tokensSaved = managerResult.entry
@@ -196,7 +211,7 @@ export async function checkSemanticCache({
       });
       return {
         success: true,
-        response: new Response(cachedSse || JSON.stringify(cached), {
+        response: new Response(cachedSse || JSON.stringify(clientResponse), {
           headers,
         }),
       };

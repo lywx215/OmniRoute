@@ -64,6 +64,7 @@ import {
   isAntigravityProvider,
   toAntigravityDiagnosticPayload,
 } from "../../executors/antigravityUpstreamError.ts";
+import { cloneResponseWithModel } from "../../services/responseModelEcho.ts";
 import { routingFinishReason } from "../chatCore/routingFinishReason.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { extractFacts } from "@/lib/memory/extraction";
@@ -98,7 +99,6 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     describeMalformedNonStream,
     detectMalformedNonStream,
     echoModel,
-    echoModelInObject,
     effectiveModel,
     effectiveServiceTier: _effectiveServiceTier,
     emitRequestGamificationEvent,
@@ -932,12 +932,15 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       };
     }
 
+    // Keep cached execution names separate from this request's presentation name.
+    const canonicalResponse = cloneResponseWithModel(translatedResponse, model);
+    translatedResponse = cloneResponseWithModel(canonicalResponse, echoModel);
     // ── Phase 9.1: Cache store (non-streaming, temp=0) ──
     storeSemanticCacheResponse({
       enabled: semanticCacheEnabled,
       body: bodyForCacheWrite,
       headers: clientRawRequest?.headers,
-      translatedResponse,
+      translatedResponse: canonicalResponse,
       model,
       // The dual-layer manager scopes entries per provider (cacheByProvider);
       // lookup passes the resolved provider, so the write must too (#14159).
@@ -951,7 +954,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     // ── Phase 9.2: Save for idempotency ──
     // Reuse the key resolved by checkIdempotencyCache() above (single derivation per
     // request). (#3821-review LEDGER-6)
-    await saveIdempotency(idempotencyKey, translatedResponse, 200);
+    await saveIdempotency(idempotencyKey, canonicalResponse, 200);
     reqLogger.logConvertedResponse(translatedResponse);
     persistAttemptLogs({
       status: 200,
@@ -1002,16 +1005,6 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       comboStrategy,
       fallbackAttempts,
     });
-    // #6426: align response body `model` with the `X-OmniRoute-Model` header
-    // (both must be the resolved backend model). Some upstreams (notably legacy
-    // /v1/completions text-completion path) return a body `model` field that
-    // differs from the resolved backend id we advertised in the header, leaving
-    // strict clients unable to reconcile the two. Rewrite body.model to `model`
-    // FIRST, then let #1311 echo override it when the opt-in setting is on.
-    if (typeof model === "string" && model) echoModelInObject(translatedResponse, model);
-    // #1311: echo the requested alias/combo name in the non-streaming response model.
-    if (echoModel) echoModelInObject(translatedResponse, echoModel);
-
     // ── Plugin onResponse hook (fire-and-forget) ──
     // #8395: the streaming branch below already calls this; the non-streaming
     // (stream:false) branch returned without it, so onResponse never fired for

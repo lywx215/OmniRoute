@@ -220,6 +220,7 @@ export function createResponsesApiTransformStream(
   const state = {
     seq: 0,
     responseId: `resp_${Date.now()}`,
+    model: undefined as string | undefined,
     created: Math.floor(Date.now() / 1000),
     started: false,
     msgTextBuf: {},
@@ -609,6 +610,7 @@ export function createResponsesApiTransformStream(
       const response: Record<string, unknown> = {
         id: state.responseId,
         object: "response",
+        ...(state.model !== undefined ? { model: state.model } : {}),
         created_at: state.created,
         status: "completed",
         background: false,
@@ -674,6 +676,12 @@ export function createResponsesApiTransformStream(
             continue;
           }
 
+          // Chat core has already applied the client-facing model presentation.
+          // Carry it across this format conversion without inspecting tool/content data.
+          if (state.model === undefined && typeof parsed.model === "string") {
+            state.model = parsed.model;
+          }
+
           // #10223: strip request_id when it looks corrupted (suspiciously
           // long — normal request IDs are <100 chars). Some providers
           // (DeepSeek) have SSE encoder bugs that leak response-ID fragments
@@ -723,6 +731,7 @@ export function createResponsesApiTransformStream(
               response: {
                 id: state.responseId,
                 object: "response",
+                ...(state.model !== undefined ? { model: state.model } : {}),
                 created_at: state.created,
                 status: "in_progress",
                 background: false,
@@ -736,6 +745,7 @@ export function createResponsesApiTransformStream(
               response: {
                 id: state.responseId,
                 object: "response",
+                ...(state.model !== undefined ? { model: state.model } : {}),
                 created_at: state.created,
                 status: "in_progress",
                 background: false,

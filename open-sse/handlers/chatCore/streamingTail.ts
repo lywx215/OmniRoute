@@ -1,3 +1,7 @@
+import {
+  cloneResponseWithModel,
+  cloneLoggedResponseWithModel,
+} from "../../services/responseModelEcho.ts";
 import { getCodexClientSessionId } from "../../config/codexIdentity.ts";
 import {
   noteCodexTurnStateProvenance,
@@ -364,6 +368,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     }
     const cacheUsageLogMeta = buildCacheUsageLogMeta(streamUsage);
     const streamConnectionId = getCurrentConnectionId();
+    const clientResponse = cloneLoggedResponseWithModel(
+      clientPayload ?? streamResponseBody ?? undefined,
+      echoModel
+    );
 
     if (normalizedStreamStatus === 200) {
       clearPostOutputFailureStreak(provider, streamConnectionId, modelInfo.model);
@@ -411,7 +419,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       provider,
       connectionId: streamConnectionId,
       providerResponse: providerPayload ?? streamResponseBody ?? undefined,
-      clientResponse: clientPayload ?? streamResponseBody ?? undefined,
+      clientResponse,
       status: normalizedStreamStatus,
       error: streamError,
       errorCode: streamErrorCode,
@@ -506,7 +514,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       responseBody: streamResponseBody ?? undefined,
       providerRequest: finalBody || translatedBody,
       providerResponse: providerPayload,
-      clientResponse: clientPayload ?? streamResponseBody ?? undefined,
+      clientResponse,
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
       cacheSource: "upstream",
@@ -568,7 +576,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     storeStreamingSemanticCacheResponse({
       enabled: semanticCacheEnabled,
       streamStatus,
-      streamResponseBody,
+      streamResponseBody: cloneResponseWithModel(streamResponseBody, model),
       body: bodyForCacheWrite,
       headers: clientRawRequest?.headers,
       model,

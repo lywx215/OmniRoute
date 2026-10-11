@@ -14,7 +14,8 @@ import { cloneBoundedForLog } from "@omniroute/open-sse/utils/requestLogger.ts";
 export function buildClientRawRequest(
   request: Request,
   body: unknown,
-  signalOverride?: AbortSignal | null
+  signalOverride?: AbortSignal | null,
+  originalRequestedModel?: string
 ) {
   const url = new URL(request.url);
   const headers = Object.fromEntries(request.headers.entries());
@@ -23,6 +24,19 @@ export function buildClientRawRequest(
   // Internal slow-keepalive deadline routing token (never client-sent, never
   // upstream-bound): set by withDeadlineSignal, consumed by getDeadlineController.
   delete headers["x-deadline-token"];
+  let snapshotBody = cloneBoundedForLog(body);
+  if (
+    typeof originalRequestedModel === "string" &&
+    originalRequestedModel.trim().length > 0 &&
+    snapshotBody !== null &&
+    typeof snapshotBody === "object" &&
+    !Array.isArray(snapshotBody)
+  ) {
+    // Keep the scalar first so subsequent bounded logging cannot discard it.
+    // Execution must use request context, never depend on this observability copy.
+    snapshotBody = { model: originalRequestedModel, ...snapshotBody };
+    (snapshotBody as Record<string, unknown>).model = originalRequestedModel;
+  }
   return {
     endpoint: url.pathname,
     // #7847: bounded, not a full deep clone. Every consumer of clientRawRequest.body is
@@ -33,7 +47,7 @@ export function buildClientRawRequest(
     // 3.19 MiB vs 0.08 MiB on the incident's 3.05 MiB / 729-message request.
     // Still a clone, not an alias — `body` is rewritten downstream (plugin onRequest hook,
     // compression), and this has to stay a snapshot of what the client actually sent.
-    body: cloneBoundedForLog(body),
+    body: snapshotBody,
     headers,
     signal: signalOverride === undefined ? (request.signal ?? null) : signalOverride,
   };

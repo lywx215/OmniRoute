@@ -13,6 +13,7 @@ import {
   type AdaptiveAdmissionRuntime,
 } from "@omniroute/open-sse/services/admission/runtime.ts";
 import type { PerTargetAdmissionHook } from "@omniroute/open-sse/services/admission/types.ts";
+import type { ChatRequestContext } from "./chat/requestContext.ts";
 
 /** Single fairness bucket for unauthenticated / keyless traffic. Opaque; never a raw key. */
 export const ANONYMOUS_ADMISSION_TENANT_KEY = "anonymous";
@@ -288,7 +289,8 @@ type HandleChatImplementation = (
   preParsedBody: any,
   correlationId: string | undefined,
   admissionContext: ChatAdmissionContext,
-  lifecycleSignal?: AbortSignal | null
+  lifecycleSignal?: AbortSignal | null,
+  requestContext?: ChatRequestContext
 ) => Promise<Response>;
 
 export type WithChatAdmissionOptions = {
@@ -308,7 +310,8 @@ export function withChatAdmission(
     clientRawRequest: any = null,
     preParsedBody: any = null,
     correlationId?: string,
-    lifecycleSignal?: AbortSignal | null
+    lifecycleSignal?: AbortSignal | null,
+    requestContext?: ChatRequestContext
   ): Promise<Response> {
     const admissionContext = createChatAdmissionContext(
       options.getRuntime ?? getAdaptiveAdmissionRuntime
@@ -321,7 +324,8 @@ export function withChatAdmission(
         preParsedBody,
         correlationId,
         admissionContext,
-        effectiveSignal
+        effectiveSignal,
+        requestContext
       );
       const admittedState = admissionContext.getAdmittedState();
       if (!admittedState) return response;

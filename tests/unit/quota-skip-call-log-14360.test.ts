@@ -16,8 +16,12 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const callLogs = await import("../../src/lib/usage/callLogs.ts");
-const { recordQuotaParkedSkip, recordGateRejection, quotaParkedSkipStatus } =
-  await import("../../src/sse/handlers/quotaParkedSkipUsage.ts");
+const {
+  recordQuotaParkedSkip,
+  recordGateRejection,
+  quotaParkedSkipStatus,
+  chatRejectionAttribution,
+} = await import("../../src/sse/handlers/quotaParkedSkipUsage.ts");
 
 const PARKED = {
   allRateLimited: true,
@@ -115,6 +119,15 @@ test("#14360 status mirrors handleNoCredentials and skips the model-cooldown bra
   assert.equal(quotaParkedSkipStatus({ allRateLimited: true }, null), 503);
   assert.equal(quotaParkedSkipStatus({ allRateLimited: true }, 502), 502);
   assert.equal(quotaParkedSkipStatus({ ...PARKED, cooldownScope: "model" }, null), null);
+});
+
+test("rejections retain the original alias after the working model changes", () => {
+  const attribution = chatRejectionAttribution({
+    body: { model: "gemini/gemini-flash-lite-latest" },
+    modelStr: "gemini/gemini-flash-lite-latest",
+    runtimeOptions: { originalRequestedModel: "gemini-2.5-pro" },
+  });
+  assert.equal(attribution.requestedModel, "gemini-2.5-pro");
 });
 
 test("the gate path shares the attribution and keeps combo fields for combo targets", async () => {

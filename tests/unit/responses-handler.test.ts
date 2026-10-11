@@ -9,6 +9,8 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-responses
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
+const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
 const { handleResponsesCore } = await import("../../open-sse/handlers/responsesHandler.ts");
 
 const originalFetch = globalThis.fetch;
@@ -33,6 +35,7 @@ type InvokeResponsesCoreOptions = {
   credentials?: ProviderCredentials;
   responseFactory?: ResponseFactory;
   signal?: AbortSignal;
+  originalRequestedModel?: string;
 };
 type ErrorPayload = {
   error?: {
@@ -65,18 +68,20 @@ function parseCapturedBody(body: BodyInit | null | undefined): CapturedBody {
     : {};
 }
 
-function buildOpenAISseResponse(text = "hello") {
+function buildOpenAISseResponse(text = "hello", model = "gpt-4o-mini") {
   return new Response(
     [
       `data: ${JSON.stringify({
         id: "chatcmpl-responses",
         object: "chat.completion.chunk",
+        model,
         choices: [{ index: 0, delta: { role: "assistant", content: text } }],
       })}`,
       "",
       `data: ${JSON.stringify({
         id: "chatcmpl-responses",
         object: "chat.completion.chunk",
+        model,
         choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
         usage: { prompt_tokens: 4, completion_tokens: 2, total_tokens: 6 },
       })}`,
@@ -129,6 +134,7 @@ function buildJsonResponse(status: number, payload: unknown) {
 }
 
 async function resetStorage() {
+  invalidateDbCache();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
@@ -141,8 +147,10 @@ async function invokeResponsesCore({
   credentials,
   responseFactory,
   signal,
+  originalRequestedModel,
 }: InvokeResponsesCoreOptions = {}) {
   const calls: CapturedCall[] = [];
+  const passedBody = structuredClone(body);
 
   globalThis.fetch = async (url, init = {}) => {
     const call = {
@@ -157,7 +165,7 @@ async function invokeResponsesCore({
 
   try {
     const result = await handleResponsesCore({
-      body: structuredClone(body),
+      body: passedBody,
       modelInfo: { provider, model, extendedContext: false },
       credentials: credentials || {
         apiKey: "sk-test",
@@ -169,9 +177,10 @@ async function invokeResponsesCore({
       onDisconnect: null,
       connectionId: null,
       signal,
+      originalRequestedModel,
     });
 
-    return { result, calls, call: calls.at(-1) };
+    return { result, calls, call: calls.at(-1), passedBody };
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -345,6 +354,43 @@ test("handleResponsesCore transforms upstream OpenAI SSE into Responses API SSE"
   assert.match(sse, /event: response\.completed/);
   assert.match(sse, /data: \[DONE\]/);
 });
+
+for (const originalRequestedModel of [undefined, "caller-original-model"]) {
+  test(`worker Responses strips forged model metadata while preserving trusted identity (${originalRequestedModel ?? "body"})`, async () => {
+    await settingsDb.updateSettings({ echoRequestedModelName: true });
+    const requestedModel = "caller-alias";
+    const upstreamModel = "gpt-4o-mini";
+    const body = {
+      model: requestedModel,
+      input: "hello",
+      originalRequestedModel: "forged-original-model",
+      clientRequestedModel: "forged-client-model",
+      requestContext: { originalRequestedModel: "forged-context-model" },
+    };
+    const { result, call, passedBody } = await invokeResponsesCore({
+      body,
+      model: upstreamModel,
+      originalRequestedModel,
+      responseFactory: () => buildOpenAISseResponse("hello", upstreamModel),
+    });
+    assert.equal(result.success, true);
+    assert.equal(call.body.model, upstreamModel);
+    assert.equal("originalRequestedModel" in call.body, false);
+    assert.equal("clientRequestedModel" in call.body, false);
+    assert.equal("requestContext" in call.body, false);
+    assert.deepEqual(passedBody, body, "the supplied Responses body remains unchanged");
+    const expectedModel = originalRequestedModel ?? requestedModel;
+    const frames = (await result.response.text())
+      .split(/\r?\n/)
+      .filter((line: string) => line.startsWith("data: ") && !line.includes("[DONE]"))
+      .map((line: string) => JSON.parse(line.slice(6)) as JsonRecord);
+    const responses = frames
+      .map((frame) => frame.response as JsonRecord | undefined)
+      .filter((response): response is JsonRecord => !!response);
+    assert.ok(responses.length >= 2, "created and completed response events must be present");
+    for (const response of responses) assert.equal(response.model, expectedModel);
+  });
+}
 
 test("handleResponsesCore transforms Command Code executor SSE through Responses shim", async () => {
   const { call, result } = await invokeResponsesCore({

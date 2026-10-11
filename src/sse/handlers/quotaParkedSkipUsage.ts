@@ -25,6 +25,7 @@ export interface ChatRejectionScope {
   clientRawRequest?: { endpoint?: string | null } | null;
   apiKeyInfo?: { id?: string | null; name?: string | null } | null;
   runtimeOptions?: {
+    originalRequestedModel?: string;
     comboStepId?: string | null;
     comboExecutionKey?: string | null;
     correlationId?: string | null;
@@ -48,7 +49,8 @@ export function chatRejectionAttribution(scope: ChatRejectionScope) {
   const opts = scope.runtimeOptions ?? null;
   const isCombo = scope.isCombo === true;
   return {
-    requestedModel: scope.body?.model || scope.modelStr || undefined,
+    requestedModel:
+      opts?.originalRequestedModel ?? scope.body?.model ?? scope.modelStr ?? undefined,
     endpoint: scope.clientRawRequest?.endpoint,
     comboName: isCombo ? (scope.comboName ?? null) : null,
     comboStepId: isCombo ? (opts?.comboStepId ?? null) : null,

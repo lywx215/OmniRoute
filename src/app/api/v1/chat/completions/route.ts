@@ -3,6 +3,10 @@ import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { callCloudWithMachineId } from "@/shared/utils/cloud";
 import { handleChat } from "@/sse/handlers/chat";
 import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
+import {
+  captureChatRequestContext,
+  type ChatRequestContext,
+} from "@/sse/handlers/chat/requestContext";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { resolveIncomingCorrelationId } from "@/shared/utils/correlationPreserve.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
@@ -163,9 +167,11 @@ export async function POST(request) {
     // the admission-rebuilt request: the bytes are already buffered in memory by
     // admitChatRequest(), so json() parses them directly — no clone(), no second stream read.
     let parsedBody = null;
+    let requestContext: ChatRequestContext | undefined;
     try {
       parsedBody = await request.json().catch(() => null);
       if (parsedBody) {
+        requestContext = captureChatRequestContext(parsedBody);
         // Route-level shape gate (T06) — validates the object already parsed above; it
         // never reads the request body a second time. See chatCompletionsRouteShapeSchema
         // for why this stays scoped to record-shaped bodies and deliberately permissive.
@@ -311,15 +317,13 @@ export async function POST(request) {
 
     if (wantsStreaming) {
       const reqId = callerCorrelationId ?? generateRequestId();
-      const {
-        signal: routeDeadlineSignal,
-        deadlineController: routeDeadlineController,
-      } = createStreamDeadlineSignal(request.signal);
+      const { signal: routeDeadlineSignal, deadlineController: routeDeadlineController } =
+        createStreamDeadlineSignal(request.signal);
       // Wrap the real handler response, not the synthetic early-keepalive response. If the
       // client cancels while handleChat is still pending, earlyStreamKeepalive will cancel the
       // eventual handler body; only that confirmed cleanup releases heavyweight capacity.
       const handlerResponse = releaseChatAdmissionAfterHandler(
-        handleChat(request, null, parsedBody, reqId, routeDeadlineSignal),
+        handleChat(request, null, parsedBody, reqId, routeDeadlineSignal, requestContext),
         admission.lease,
         { signal: routeDeadlineSignal }
       );
@@ -338,7 +342,14 @@ export async function POST(request) {
 
     return finishAdmission(
       withCompressionHeaderEcho(
-        await handleChat(request, null, parsedBody, callerCorrelationId ?? undefined),
+        await handleChat(
+          request,
+          null,
+          parsedBody,
+          callerCorrelationId ?? undefined,
+          undefined,
+          requestContext
+        ),
         compressionRequestHeader
       )
     );

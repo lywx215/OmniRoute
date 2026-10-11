@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { handleChat } from "@/sse/handlers/chat";
 import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
+import { captureChatRequestContext } from "@/sse/handlers/chat/requestContext";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { resolveResponsesApiModel } from "@/app/api/internal/codex-responses-ws/modelResolution";
@@ -137,6 +138,7 @@ async function postHandler(request: any) {
       return finishAdmission(errorResponse(400, "Request body must be a JSON object"));
     }
     parsedBody = parsed.data;
+    const requestContext = captureChatRequestContext(parsedBody);
 
     const structuralAdmission = await admitChatStructure(parsedBody, admission.lease, {
       sessionId,
@@ -215,7 +217,7 @@ async function postHandler(request: any) {
         request.signal
       );
       const handlerResponse = releaseChatAdmissionAfterHandler(
-        handleChat(resolved, null, resolvedBody, correlationId, streamSignal),
+        handleChat(resolved, null, resolvedBody, correlationId, streamSignal, requestContext),
         admission.lease,
         { signal: streamSignal }
       );
@@ -234,7 +236,9 @@ async function postHandler(request: any) {
       });
     }
 
-    return finishAdmission(await handleChat(resolved, null, resolvedBody, correlationId));
+    return finishAdmission(
+      await handleChat(resolved, null, resolvedBody, correlationId, undefined, requestContext)
+    );
   } catch (error) {
     admission.lease?.release();
     throw error;

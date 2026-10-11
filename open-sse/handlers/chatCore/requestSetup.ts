@@ -19,8 +19,10 @@ export type ChatCoreRequestSetup = {
    * the provider default.
    */
   customModelTargetFormat: string | undefined;
-  /** The client-requested model string, falling back to the resolved model id when absent/blank. */
+  /** The working request model string, falling back to the resolved model id when absent/blank. */
   requestedModel: string;
+  /** Exact client identity, independent of the model currently selected for execution. */
+  clientRequestedModel: string;
 };
 
 /**
@@ -31,7 +33,8 @@ export type ChatCoreRequestSetup = {
 export function resolveChatCoreRequestSetup(
   modelInfo: unknown,
   body: { model?: unknown } | null | undefined,
-  model: string
+  model: string,
+  originalRequestedModel?: string
 ): ChatCoreRequestSetup {
   const apiFormat: string | undefined =
     modelInfo && typeof modelInfo === "object" && "apiFormat" in modelInfo
@@ -47,5 +50,9 @@ export function resolveChatCoreRequestSetup(
       : undefined;
   const requestedModel =
     typeof body?.model === "string" && body.model.trim().length > 0 ? body.model : model;
-  return { apiFormat, customModelTargetFormat, requestedModel };
+  const clientRequestedModel =
+    typeof originalRequestedModel === "string" && originalRequestedModel.trim().length > 0
+      ? originalRequestedModel
+      : requestedModel;
+  return { apiFormat, customModelTargetFormat, requestedModel, clientRequestedModel };
 }

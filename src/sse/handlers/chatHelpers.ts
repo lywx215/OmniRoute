@@ -416,6 +416,7 @@ export async function executeChatWithBreaker({
   bypassCircuitBreaker,
   breaker,
   body,
+  originalRequestedModel,
   provider,
   model,
   refreshedCredentials,
@@ -493,6 +494,7 @@ export async function executeChatWithBreaker({
         runWithProxyContext(proxyInfo?.proxy || null, () =>
           (handleChatCore as any)({
             body: { ...body, model: `${provider}/${model}` },
+            originalRequestedModel,
             // Preserve the resolved catalog metadata and per-model wire format
             // through the dispatch boundary, including native reasoning tiers.
             modelInfo: {

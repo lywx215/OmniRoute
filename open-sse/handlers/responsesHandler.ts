@@ -23,6 +23,7 @@ import { SSE_HEARTBEAT_INTERVAL_MS } from "../config/constants.ts";
  * @param {function} options.onDisconnect - Callback when client disconnects
  * @param {string} options.connectionId - Connection ID for usage tracking
  * @param {AbortSignal} [options.signal] - Abort signal for request/disconnect cleanup
+ * @param {string} [options.originalRequestedModel] - Original client model before routing
  * @returns {Promise<{success: boolean, response?: Response, status?: number, error?: string}>}
  */
 export async function handleResponsesCore({
@@ -35,7 +36,14 @@ export async function handleResponsesCore({
   onDisconnect,
   connectionId,
   signal,
+  originalRequestedModel = undefined,
 }) {
+  const originalModel =
+    typeof originalRequestedModel === "string" && originalRequestedModel.trim().length > 0
+      ? originalRequestedModel
+      : typeof body?.model === "string" && body.model.trim().length > 0
+        ? body.model
+        : undefined;
   const inputItems = Array.isArray(body?.input) ? body.input : [];
   const customToolNames = collectResponsesCustomToolNames(body?.tools, inputItems);
 
@@ -61,6 +69,7 @@ export async function handleResponsesCore({
   // Call chat core handler
   const result = await handleChatCore({
     body: convertedBody,
+    originalRequestedModel: originalModel,
     modelInfo,
     credentials,
     log,

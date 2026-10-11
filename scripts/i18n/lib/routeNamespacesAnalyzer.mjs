@@ -9,8 +9,8 @@
  *                client components).
  *  - `chrome`  — namespaces needed by the shared dashboard shell rendered by
  *                `src/app/(dashboard)/layout.tsx` (Header, Sidebar, …).
- *  - `home`    — the dashboard home route (`/dashboard` page.tsx + the
- *                component files that live directly under `dashboard/`).
+ *  - `home`    — the `/home` subtree and the companion components that
+ *                live directly under `dashboard/` (the legacy entry route).
  *  - `sections`— one entry per top-level section directory under
  *                `src/app/(dashboard)/dashboard/` that (recursively) contains
  *                a page.tsx.
@@ -228,10 +228,11 @@ export function analyzeRouteNamespaces() {
   // Dashboard chrome: everything reachable from the (dashboard) root layout.
   const chrome = closureNamespaces([join(DASHBOARD_ROOT, "layout.tsx")]);
 
-  // Dashboard home: files directly under dashboard/ (page + companions).
+  // Both home entry points: /home plus the legacy /dashboard companions.
   const homeFiles = readdirSync(SECTIONS_ROOT)
     .filter((name) => /\.(tsx|ts)$/.test(name))
     .map((name) => join(SECTIONS_ROOT, name));
+  homeFiles.push(...walkFiles(join(DASHBOARD_ROOT, "home")));
   const home = new Set([...chrome]);
   for (const ns of closureNamespaces(homeFiles)) home.add(ns);
 

@@ -42,7 +42,7 @@ test("endpoint and headers are captured from the request", () => {
   assert.equal(out.headers["content-type"], "application/json");
 });
 
-test("buildClientRawRequest can carry an explicit stream lifecycle signal", () => {
+test("buildClientRawRequest carries lifecycle and original model independently", () => {
   const requestAbort = new AbortController();
   const streamAbort = new AbortController();
   const request = new Request("http://x/v1/responses", {
@@ -50,9 +50,20 @@ test("buildClientRawRequest can carry an explicit stream lifecycle signal", () =
     body: "{}",
     signal: requestAbort.signal,
   });
-  const out = buildClientRawRequest(request, { model: "m" }, streamAbort.signal);
+  const out = buildClientRawRequest(request, { model: "m" }, streamAbort.signal, "Gemini/Pro");
   assert.equal(out.signal, streamAbort.signal);
+  assert.equal((out.body as Record<string, unknown>).model, "Gemini/Pro");
   assert.notEqual(out.signal, requestAbort.signal);
+});
+
+test("an explicit original model survives bounded snapshot truncation and later mutation", () => {
+  const body: Record<string, unknown> = {};
+  for (let index = 0; index < 300; index += 1) body[`extra_${index}`] = index;
+  body.model = "gemini/gemini-flash-lite-latest";
+  const out = buildClientRawRequest(req(body), body, undefined, "gemini-2.5-pro");
+  body.model = "changed-after-capture";
+  assert.equal((out.body as Record<string, unknown>).model, "gemini-2.5-pro");
+  assert.ok(Object.keys(out.body as object).length < Object.keys(body).length);
 });
 
 // #7360 follow-up (live incident, log id 1784418258231-14961a): a combo target
