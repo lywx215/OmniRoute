@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
 import { getProviderNodeById } from "@/models";
 import {
@@ -131,6 +132,9 @@ export async function POST(request) {
           provider,
           apiKey,
           providerSpecificData,
+          // Only the Devin fallback launches a CLI. Keep HTTP validation available
+          // to remote dashboards while deriving spawn permission from the trusted peer.
+          allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
         })
       )
     );

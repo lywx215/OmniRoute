@@ -8,11 +8,90 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-providers
 process.env.DATA_DIR = TEST_DATA_DIR;
 const originalAllowPrivateProviderUrls = process.env.OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS;
 const originalAllowLocalProviderUrls = process.env.OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS;
+const originalJwtSecret = process.env.JWT_SECRET;
 
 // Load modules at top level
 const core = await import("../../src/lib/db/core.ts");
 const compliance = await import("../../src/lib/compliance/index.ts");
 const validateRoute = await import("../../src/app/api/providers/validate/route.ts");
+const { mintDashboardSessionToken } =
+  await import("../../src/shared/utils/dashboardSessionToken.ts");
+
+async function dashboardTestHeaders() {
+  process.env.JWT_SECRET = "providers-validation-route-test-secret";
+  const token = await mintDashboardSessionToken(new TextEncoder().encode(process.env.JWT_SECRET));
+  return { cookie: `auth_token=${token}` };
+}
+
+test("remote Gemini cookie validation reaches the HTTP validator", async () => {
+  await resetStorage();
+  const originalFetch = globalThis.fetch;
+  let probed = false;
+  globalThis.fetch = async (url, init) => {
+    assert.equal(String(url), "https://gemini.google.com/app");
+    assert.equal(new Headers(init?.headers).get("cookie"), "__Secure-1PSID=test-cookie");
+    probed = true;
+    return new Response('<script>{"SNlM0e":"test-session-token"}</script>', { status: 200 });
+  };
+  try {
+    const response = await validateRoute.POST(
+      new Request("https://example.com/api/providers/validate", {
+        method: "POST",
+        headers: await dashboardTestHeaders(),
+        body: JSON.stringify({ provider: "gemini-web", apiKey: "__Secure-1PSID=test-cookie" }),
+      })
+    );
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.valid, true, JSON.stringify(body));
+    assert.equal(probed, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("validation never starts the Devin CLI for a remote or unstamped localhost request", async () => {
+  await resetStorage();
+  const originalFetch = globalThis.fetch;
+  const originalBin = process.env.CLI_DEVIN_BIN;
+  const originalMarker = process.env.OMNIROUTE_VALIDATION_SPAWN_MARKER;
+  const originalCwd = process.cwd();
+  const originalStampToken = process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-validation-spawn-"));
+  const marker = path.join(fixtureDir, "spawned");
+  fs.writeFileSync(
+    path.join(fixtureDir, "acp"),
+    'require("node:fs").writeFileSync(process.env.OMNIROUTE_VALIDATION_SPAWN_MARKER, "spawned");'
+  );
+  process.env.CLI_DEVIN_BIN = process.execPath;
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "validation-route-test-stamp";
+  process.env.OMNIROUTE_VALIDATION_SPAWN_MARKER = marker;
+  process.chdir(fixtureDir);
+  globalThis.fetch = async () => new Response("{}", { status: 401 });
+  try {
+    for (const host of ["example.com", "localhost"]) {
+      const response = await validateRoute.POST(
+        new Request(`https://${host}/api/providers/validate`, {
+          method: "POST",
+          headers: { ...(await dashboardTestHeaders()), host, "x-forwarded-for": "127.0.0.1" },
+          body: JSON.stringify({ provider: "devin", apiKey: "test-key" }),
+        })
+      );
+      assert.equal(fs.existsSync(marker), false, "untrusted request must not spawn a CLI");
+      assert.equal((await response.json()).valid, false);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.chdir(originalCwd);
+    if (originalStampToken === undefined) delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+    else process.env.OMNIROUTE_PEER_STAMP_TOKEN = originalStampToken;
+    if (originalBin === undefined) delete process.env.CLI_DEVIN_BIN;
+    else process.env.CLI_DEVIN_BIN = originalBin;
+    if (originalMarker === undefined) delete process.env.OMNIROUTE_VALIDATION_SPAWN_MARKER;
+    else process.env.OMNIROUTE_VALIDATION_SPAWN_MARKER = originalMarker;
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+  }
+});
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -21,6 +100,8 @@ async function resetStorage() {
 }
 
 test.after(() => {
+  if (originalJwtSecret === undefined) delete process.env.JWT_SECRET;
+  else process.env.JWT_SECRET = originalJwtSecret;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (originalAllowPrivateProviderUrls === undefined) {

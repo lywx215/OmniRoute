@@ -14,24 +14,24 @@
 //      reached from GET /api/providers/[id]/models
 //
 // Hard Rules #15 and #17 require loopback enforcement unconditionally before
-// any auth check. This test asserts isLocalOnlyPath() returns true for all
-// spawn-capable paths, and false for the non-spawning siblings (no over-broadening).
+// any spawn. Import/bulk remain path-gated; validation gates its conditional CLI
+// fallback at the call site so remote HTTP-only validation stays available.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { isLocalOnlyPath } from "../../../src/server/authz/routeGuard.ts";
 
 // ─── S-01: /api/providers/validate, /import, /bulk spawn a child process ──
 
-test("isLocalOnlyPath: /api/providers/validate, /import, /bulk are local-only (S-01, #15159)", () => {
+test("isLocalOnlyPath: validation stays remote-reachable while import/bulk remain local-only", () => {
   // webProvidersB.ts:535 spawns `bin` with argv ["acp", "--agent-type", "summarizer"].
   // The binary comes from a fixed candidate list and argv is fixed — not caller-
   // controlled RCE — but Hard Rules #15 + #17 still require loopback enforcement
   // before any auth check so a leaked JWT via tunnel cannot trigger the spawn.
-  assert.equal(isLocalOnlyPath("/api/providers/validate"), true);
+  assert.equal(isLocalOnlyPath("/api/providers/validate"), false);
   assert.equal(isLocalOnlyPath("/api/providers/import"), true);
   assert.equal(isLocalOnlyPath("/api/providers/bulk"), true);
   // Trailing slash must also match (Next.js normalizes but the guard should be safe)
-  assert.equal(isLocalOnlyPath("/api/providers/validate/"), true);
+  assert.equal(isLocalOnlyPath("/api/providers/validate/"), false);
   assert.equal(isLocalOnlyPath("/api/providers/import/"), true);
   assert.equal(isLocalOnlyPath("/api/providers/bulk/"), true);
 });
@@ -81,7 +81,7 @@ test("S-01: the cursor-agent spawn call site requires a loopback peer", async ()
 
 test("isLocalOnlyPath: non-spawn /api/providers/ routes stay remote-reachable (S-01)", () => {
   // The generic provider CRUD surface must NOT be loopback-locked.
-  // Only the spawn-capable validate/import/bulk paths are gated.
+  // Import/bulk remain gated; validation checks locality at its conditional spawn.
   assert.equal(isLocalOnlyPath("/api/providers"), false);
   assert.equal(isLocalOnlyPath("/api/providers/"), false);
   assert.equal(isLocalOnlyPath("/api/providers/cursor"), false);
